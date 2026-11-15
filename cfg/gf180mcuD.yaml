@@ -129,6 +129,9 @@ tt:
         21: 1400500
   huge_modules:
     mux_id: [ 12, 15 ]
+  # Modules explicitly implementing the common-SRAM extension.
+  # Standard TinyTapeout modules remain SRAM-disabled by default.
+  sram_modules: []
   logo:
     tt_logo_top:
       width: 65000

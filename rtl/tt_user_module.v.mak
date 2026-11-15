@@ -56,11 +56,11 @@ module tt_user_module #(
 	wire       clk;
 	wire       rst_n;
 	wire [N_SRAM_DATA-1:0]  sram_rdata;
-	tri1                    sram_cs_n;
-	tri1                    sram_we_n;
-	tri0 [N_SRAM_WMASK-1:0] sram_wmask;
-	tri0 [N_SRAM_ADDR-1:0]  sram_addr;
-	tri0 [N_SRAM_DATA-1:0]  sram_wdata;
+	wire                    sram_cs_n;
+	wire                    sram_we_n;
+	wire [N_SRAM_WMASK-1:0] sram_wmask;
+	wire [N_SRAM_ADDR-1:0]  sram_addr;
+	wire [N_SRAM_DATA-1:0]  sram_wdata;
 
 	assign { sram_rdata, uio_in, ui_in, rst_n, clk } = iw;
 	assign ow = { sram_wdata, sram_addr, sram_wmask, sram_we_n, sram_cs_n, uio_oe, uio_out, uo_out };
@@ -90,9 +90,28 @@ module tt_user_module #(
 				.ui_in   (ui_in),
 				.ena     (ena),
 				.clk     (clk),
-				.rst_n   (rst_n),
-				.*
+%  if mod.sram:
+				.rst_n      (rst_n),
+				.sram_cs_n  (sram_cs_n),
+				.sram_we_n  (sram_we_n),
+				.sram_wmask (sram_wmask),
+				.sram_addr  (sram_addr),
+				.sram_wdata (sram_wdata),
+				.sram_rdata (sram_rdata)
+%  else:
+				.rst_n   (rst_n)
+%  endif
 			);
+
+%  if not mod.sram:
+			// A standard TinyTapeout user module has no SRAM extension.
+			// Keep the shared SRAM deselected and its write data deterministic.
+			assign sram_cs_n  = 1'b1;
+			assign sram_we_n  = 1'b1;
+			assign sram_wmask = {N_SRAM_WMASK{1'b0}};
+			assign sram_addr  = {N_SRAM_ADDR{1'b0}};
+			assign sram_wdata = {N_SRAM_DATA{1'b0}};
+%  endif
 %  if mod.analog:
 %   for (pin_int, pin_ext) in mod.analog.items():
 			${mod.asw_module} tt_asw_${pin_int}_I (

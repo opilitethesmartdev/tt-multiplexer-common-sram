@@ -29,6 +29,7 @@ class ModuleSlot:
 		self.pg_vdd = cfg_data.get('pg_vdd', True)
 		self.pg_vaa = cfg_data.get('pg_vaa', False)
 		self.analog = cfg_data.get('analog', {})
+		self.sram = cfg_data.get('sram', self.name in getattr(self.placer.cfg.tt, 'sram_modules', []))
 
 		if self.pg_vdd is True:
 			self.pg_vdd = 'hp' if self.width > 4 else 'll'
@@ -49,6 +50,7 @@ class ModuleSlot:
 			'pg_vdd': self.pg_vdd,
 			'pg_vaa': self.pg_vaa,
 			'analog': self.analog,
+			'sram':   self.sram,
 		}
 
 	@property
