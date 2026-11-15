@@ -4,6 +4,7 @@ on: [ push, workflow_dispatch, pull_request ]
 jobs:
   formal:
     # ubuntu
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
     # need the repo checked out
