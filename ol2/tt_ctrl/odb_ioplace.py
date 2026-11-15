@@ -47,6 +47,15 @@ def io_place(
 	for pn, pp in tti.layout.ply_ctrl_io_bot.items():
 		tt_odb.place_pin(die_area, layer_ns, bterm_map.pop(pn), pp, 'S')
 
+	# Place any remaining unplaced pins (e.g. SRAM pins)
+	if bterm_map:
+		remaining = list(bterm_map.items())
+		step = (die_area.xMax() - die_area.xMin()) // (len(remaining) + 1)
+		x = die_area.xMin() + step
+		for name, bterm in remaining:
+			tt_odb.place_pin(die_area, layer_ns, bterm_map.pop(name), x, 'N')
+			x += step
+
 
 if __name__ == "__main__":
 	io_place()
