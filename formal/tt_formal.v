@@ -48,7 +48,7 @@ module tt_formal;
 `ifdef OE_POLARITY_NEGATIVE
 	assign io_in[`TT_N_I + `TT_N_IO - 1 : `TT_N_I] = io_out[`TT_N_I + `TT_N_IO - 1 : `TT_N_I] & (~io_oex[`TT_N_I + `TT_N_IO - 1 : `TT_N_I]);
 `else
-	assign io_in[`TT_N_I + `TT_N_IO - 1 : `TT_N_I] = io_out[`TT_N_I + `TT_N_IO - 1 : `TT_N_I] & io_oex[`TT_N_I + `TT_N_IO - 1 : `TT_N_I];
+	assign io_in[`TT_N_I + `TT_N_IO - 1 : `TT_N_I] = io_out[`TT_N_I + `TT_N_IO - 1 : `TT_N_I] & (~io_oex[`TT_N_I + `TT_N_IO - 1 : `TT_N_I]);
 `endif
 
 endmodule // tt_formal
