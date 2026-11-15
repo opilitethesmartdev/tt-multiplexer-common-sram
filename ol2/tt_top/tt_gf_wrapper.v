@@ -19,6 +19,7 @@ module tt_gf_wrapper (
 	inout wire [73:0] pad_raw
 );
 
+	wire [43:0] io_ana;
 	wire [43:0] io_in;
 	wire [43:0] io_out;
 	wire [43:0] io_oex;
@@ -44,12 +45,26 @@ module tt_gf_wrapper (
 	assign io_in[9] = pad_raw[46];
 	assign io_in[8:2] = pad_raw[53:47];
 
+	// Expose the twelve analog-capable pads used by tt_top.
+	// Keep both directions connected so user analog switches can pass
+	// signals between the physical pads and the user modules.
+	assign io_ana[12:7] = pad_raw[24:19];
+	assign pad_raw[24:19] = io_ana[12:7];
+	assign io_ana[37:32] = pad_raw[32:27];
+	assign pad_raw[32:27] = io_ana[37:32];
+
+	// Drive output and bidirectional pads only when their output enables
+	// are asserted. GF180 uses active-high output enables.
+	assign pad_raw[16:9] = io_oex[25:18] ? io_out[25:18] : 8'bz;
+	assign pad_raw[44:37] = io_oex[33:26] ? io_out[33:26] : 8'bz;
+
 	tt_top top_I (
 `ifdef USE_POWER_PINS
 		.VDPWR  (VDPWR),
 		.VAPWR  (VAPWR),
 		.VGND   (VGND),
 `endif
+		.io_ana (io_ana),
 		.io_in  (io_in),
 		.io_out (io_out),
 		.io_oex (io_oex),
