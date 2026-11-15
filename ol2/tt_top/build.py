@@ -202,18 +202,23 @@ if __name__ == '__main__':
 			for m in user_modules
 	]))
 
+	design_name = os.getenv('DESIGN_NAME') or (
+		'tt_gf_wrapper' if tti.cfg.pdk.name == 'gf180mcuD' else 'openframe_project_wrapper'
+	)
+
 	# Custom config
 	flow_cfg = {
 		# Main design properties
-		"DESIGN_NAME"    : "openframe_project_wrapper",
+		"DESIGN_NAME"    : design_name,
 		"DESIGN_IS_CORE" : False,
 
 		# Sources
 		"VERILOG_FILES": [
-			"dir::openframe_project_wrapper.v",
+			f"dir::{design_name}.v",
 			"dir::../../rtl/tt_top.v",
 			"dir::../../rtl/tt_gpio.v",
 			"dir::../../rtl/tt_user_module.v",
+			"dir::../../rtl/c4m_arrakeen_sram_512x32.v",
 		],
 
 		"VERILOG_POWER_DEFINE": "USE_POWER_PINS",
