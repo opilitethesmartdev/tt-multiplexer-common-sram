@@ -28,9 +28,9 @@ This repository is a customized fork of the Tiny Tapeout multiplexer targeting t
 3. **Experimental All-Bidirectional Pinout (`experimental-all-bidir` branch)**:
    - This custom pinout maximizes flexibility by configuring nearly all general-purpose digital IOs as bidirectional. The allocation includes:
      - **34 Bidirectional I/Os**: `uio_in[33:0]`, `uio_out[33:0]`, `uio_oe[33:0]` (output enable).
-     - **2 Dedicated Inputs**: `clk` and `rst_n` for clock and reset signals.
-     - **Analog Pins**: 2 external analog pins (`ana[1:0]`) and 2 internal user-accessible analog pins.
-   - **Mux Control Inputs**: Three dedicated inputs (`ctrl_ena`, `ctrl_sel_inc`, `ctrl_sel_rst_n`) are used to control the multiplexer and select the active user design. These are separate from the user-accessible `ui_in` signals.
+     - **2 Dedicated Inputs**: `clk` (user clock) and `rst_n` (user reset) for clock and reset signals.
+     - **Analog Pins**: 2 external analog pins (`ana[1:0]`) and 2 internal user-accessible analog pins (`ua[1:0]`).
+   - **Mux Control Inputs**: Three dedicated inputs (`ctrl_ena`, `ctrl_sel_inc`, `ctrl_sel_rst_n`) are used to control the multiplexer and select the active user design. These are entirely separate from the user-accessible `clk` and `rst_n` signals.
 
 ## Overview & Architecture
 

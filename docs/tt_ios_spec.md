@@ -23,13 +23,13 @@
 
  * Experimental Pinout Configuration (`experimental-all-bidir` branch) :
 
-   - **34 Bidirectional I/Os**: `uio[33:0]`
+   - **34 Bidirectional I/Os**: `uio[33:0]`.
      - In this experimental configuration, nearly all general-purpose digital pins are made bidirectional, offering maximum flexibility. `uio_oe` controls the output enable.
-   - **2 Dedicated Inputs**: `clk` and `rst_n`
-     - These pins are dedicated for clock and reset signals.
-   - **2 Analog Pins**: `ana[1:0]`
-     - These pins are available for analog functionalities.
-   - **Mux Control Inputs**: Three dedicated inputs (`ctrl_ena`, `ctrl_sel_inc`, `ctrl_sel_rst_n`) are used to control the multiplexer and select the active user design. These are separate from the user-accessible `ui` signals.
+   - **2 Dedicated Inputs**: `clk` (user clock) and `rst_n` (user reset).
+     - These pins are dedicated for clock and reset signals to the user project. They are multiplexed through the TinyTapeout control logic.
+   - **2 Analog Pins**: `ana[1:0]`.
+     - These pins are available for analog functionalities, typically connected to external analog components.
+   - **Mux Control Inputs**: Three dedicated inputs (`ctrl_ena`, `ctrl_sel_inc`, `ctrl_sel_rst_n`) are used to control the multiplexer and select the active user design. These are entirely separate from the user-accessible `clk` and `rst_n` signals.
 
  * Input path ( Controller -> User module ) :
 
