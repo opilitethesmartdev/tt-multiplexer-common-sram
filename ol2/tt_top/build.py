@@ -234,7 +234,10 @@ if __name__ == '__main__':
 		"SIGNOFF_SDC_FILE" : "dir::signoff.sdc",
 
 		# Synthesis
-		"SYNTH_ELABORATE_ONLY"      : True,
+		# GF180 includes a behavioral 512x32 SRAM model in the top wrapper.
+		# It must be mapped to standard cells; leaving the flow in elaborate-only
+		# mode would carry generic $mem/$mux/$dff cells into physical design.
+		"SYNTH_ELABORATE_ONLY"      : tti.cfg.pdk.name != "gf180mcuD",
 		"SYNTH_USE_PG_PINS_DEFINES" : "USE_POWER_PINS",
 
 		"SYNTH_EXCLUSION_CELL_LIST" : "dir::no_synth_cells.txt",
