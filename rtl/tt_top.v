@@ -39,11 +39,17 @@ module tt_top #(
 	output wire k_one
 );
 
-	localparam integer S_OW = N_O + N_IO * 2 + 2;
-	localparam integer S_IW = N_I + N_IO + 9 + 1 + 2;
+	localparam integer N_SRAM_ADDR  = `TT_N_SRAM_ADDR;
+	localparam integer N_SRAM_DATA  = `TT_N_SRAM_DATA;
+	localparam integer N_SRAM_WMASK = `TT_N_SRAM_WMASK;
+	localparam integer N_SRAM_OW    = `TT_N_SRAM_OW;
+	localparam integer N_SRAM_IW    = `TT_N_SRAM_IW;
 
-	localparam integer U_OW = N_O + N_IO * 2;
-	localparam integer U_IW = N_I + N_IO;
+	localparam integer S_OW = N_O + N_IO * 2 + N_SRAM_OW + 2;
+	localparam integer S_IW = N_I + N_IO + N_SRAM_IW + 9 + 1 + 2;
+
+	localparam integer U_OW = N_O + N_IO * 2 + N_SRAM_OW;
+	localparam integer U_IW = N_I + N_IO + N_SRAM_IW;
 
 
 	// Signals
@@ -157,6 +163,27 @@ module tt_top #(
 	// Controller
 	// ----------
 
+	wire                    sram_cs_n;
+	wire                    sram_we_n;
+	wire [N_SRAM_WMASK-1:0] sram_wmask;
+	wire [N_SRAM_ADDR-1:0]  sram_addr;
+	wire [N_SRAM_DATA-1:0]  sram_wdata;
+	wire [N_SRAM_DATA-1:0]  sram_rdata;
+
+	c4m_arrakeen_sram_512x32 sram_I (
+`ifdef USE_POWER_PINS
+		.VDPWR (VDPWR),
+		.VGND  (VGND),
+`endif
+		.clk   (pad_ui_in[0]),
+		.cs_n  (sram_cs_n),
+		.we_n  (sram_we_n),
+		.wmask (sram_wmask),
+		.addr  (sram_addr),
+		.din   (sram_wdata),
+		.dout  (sram_rdata)
+	);
+
 	(* blackbox *)
 	tt_ctrl
 `ifdef SIM
@@ -176,6 +203,12 @@ module tt_top #(
 		.pad_uio_oex    (pad_uio_oex),
 		.pad_uo_out     (pad_uo_out),
 		.pad_ui_in      (pad_ui_in),
+		.sram_cs_n      (sram_cs_n),
+		.sram_we_n      (sram_we_n),
+		.sram_wmask     (sram_wmask),
+		.sram_addr      (sram_addr),
+		.sram_wdata     (sram_wdata),
+		.sram_rdata     (sram_rdata),
 		.spine_top_ow   (spine_top_ow),
 		.spine_top_iw   (spine_top_iw),
 		.spine_bot_ow   (spine_bot_ow),

@@ -90,6 +90,9 @@ tt:
     i:  10
     o:   8
     io:  8
+    sram_addr: 9
+    sram_data: 32
+    sram_wmask: 4
   spine:
     vlayer: 'Metal4'
     hlayer: 'Metal3'

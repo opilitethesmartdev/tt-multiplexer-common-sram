@@ -16,6 +16,12 @@
 `define TT_N_O  ${cfg.tt.uio.o}
 `define TT_N_I  ${cfg.tt.uio.i}
 
+`define TT_N_SRAM_ADDR  ${getattr(cfg.tt.uio, 'sram_addr', 9)}
+`define TT_N_SRAM_DATA  ${getattr(cfg.tt.uio, 'sram_data', 32)}
+`define TT_N_SRAM_WMASK ${getattr(cfg.tt.uio, 'sram_wmask', 4)}
+`define TT_N_SRAM_OW    ${1 + 1 + getattr(cfg.tt.uio, 'sram_wmask', 4) + getattr(cfg.tt.uio, 'sram_addr', 9) + getattr(cfg.tt.uio, 'sram_data', 32)}
+`define TT_N_SRAM_IW    ${getattr(cfg.tt.uio, 'sram_data', 32)}
+
 `define TT_TECH_${cfg.pdk.tech.upper()}
 
 `ifdef TT_TECH_SKY130

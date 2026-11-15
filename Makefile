@@ -17,6 +17,7 @@ RTL_SRC=$(addprefix rtl/, \
 	tt_top.v \
 	tt_ctrl.v \
 	tt_mux.v \
+	c4m_arrakeen_sram_512x32.v \
 )
 
 RTL_INC=$(addprefix rtl/, \

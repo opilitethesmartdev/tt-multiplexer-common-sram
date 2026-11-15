@@ -17,7 +17,13 @@ module tt_um_formal (
 	output wire [7:0] uio_oe,	// IOs: Enable path (active high: 0=input, 1=output)
 	input  wire       ena,
 	input  wire       clk,
-	input  wire       rst_n
+	input  wire       rst_n,
+	output wire        sram_cs_n,
+	output wire        sram_we_n,
+	output wire [3:0]  sram_wmask,
+	output wire [8:0]  sram_addr,
+	output wire [31:0] sram_wdata,
+	input  wire [31:0] sram_rdata
 );
     
     // let solver drive the outputs
@@ -26,6 +32,12 @@ module tt_um_formal (
     rand reg [7:0] anyseq2; assign uio_out  = anyseq2;
     // bidirectional enables
     rand reg [7:0] anyseq3; assign uio_oe   = anyseq3;
+
+    rand reg        anyseq_cs_n;  assign sram_cs_n  = anyseq_cs_n;
+    rand reg        anyseq_we_n;  assign sram_we_n  = anyseq_we_n;
+    rand reg [3:0]  anyseq_wmask; assign sram_wmask = anyseq_wmask;
+    rand reg [8:0]  anyseq_addr;  assign sram_addr  = anyseq_addr;
+    rand reg [31:0] anyseq_wdata; assign sram_wdata = anyseq_wdata;
     
     always @(*) begin
         if(ena) begin

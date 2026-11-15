@@ -11,6 +11,7 @@
  */
 
 `default_nettype none
+`include "tt_defs.vh"
 
 module tt_user_module #(
 	// Logical  Position
@@ -23,10 +24,15 @@ module tt_user_module #(
 	parameter integer N_IO   = 8,
 	parameter integer N_O    = 8,
 	parameter integer N_I    = 10,
+	parameter integer N_SRAM_ADDR  = `TT_N_SRAM_ADDR,
+	parameter integer N_SRAM_DATA  = `TT_N_SRAM_DATA,
+	parameter integer N_SRAM_WMASK = `TT_N_SRAM_WMASK,
+	parameter integer N_SRAM_OW    = `TT_N_SRAM_OW,
+	parameter integer N_SRAM_IW    = `TT_N_SRAM_IW,
 
 	// auto-set
-	parameter integer N_OW = N_O + N_IO * 2 ,
-	parameter integer N_IW = N_I + N_IO
+	parameter integer N_OW = N_O + N_IO * 2 + N_SRAM_OW,
+	parameter integer N_IW = N_I + N_IO + N_SRAM_IW
 )(
 `ifdef USE_POWER_PINS
 	input  wire VDPWR,
@@ -49,9 +55,15 @@ module tt_user_module #(
 	wire [7:0] ui_in;
 	wire       clk;
 	wire       rst_n;
+	wire [N_SRAM_DATA-1:0]  sram_rdata;
+	wire                    sram_cs_n;
+	wire                    sram_we_n;
+	wire [N_SRAM_WMASK-1:0] sram_wmask;
+	wire [N_SRAM_ADDR-1:0]  sram_addr;
+	wire [N_SRAM_DATA-1:0]  sram_wdata;
 
-	assign { uio_in, ui_in, rst_n, clk } = iw;
-	assign ow = { uio_oe, uio_out, uo_out };
+	assign { sram_rdata, uio_in, ui_in, rst_n, clk } = iw;
+	assign ow = { sram_wdata, sram_addr, sram_wmask, sram_we_n, sram_cs_n, uio_oe, uio_out, uo_out };
 
 	generate
 		case ({MUX_ID[15:0], BLK_ID[15:0]})
@@ -78,7 +90,13 @@ module tt_user_module #(
 				.ui_in   (ui_in),
 				.ena     (ena),
 				.clk     (clk),
-				.rst_n   (rst_n)
+				.rst_n   (rst_n),
+				.sram_cs_n  (sram_cs_n),
+				.sram_we_n  (sram_we_n),
+				.sram_wmask (sram_wmask),
+				.sram_addr  (sram_addr),
+				.sram_wdata (sram_wdata),
+				.sram_rdata (sram_rdata)
 			);
 %  if mod.analog:
 %   for (pin_int, pin_ext) in mod.analog.items():

@@ -20,7 +20,13 @@ module tt_um_example (
 	output wire [7:0] uio_oe,	// IOs: Enable path (active high: 0=input, 1=output)
 	input  wire       ena,
 	input  wire       clk,
-	input  wire       rst_n
+	input  wire       rst_n,
+	output wire        sram_cs_n,
+	output wire        sram_we_n,
+	output wire [3:0]  sram_wmask,
+	output wire [8:0]  sram_addr,
+	output wire [31:0] sram_wdata,
+	input  wire [31:0] sram_rdata
 );
 
 
