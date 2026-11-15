@@ -10,12 +10,16 @@
 #
 
 import argparse
+import tt
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--module")
 args = parser.parse_args()
 
+cfg = tt.TinyTapeout.get_config()
+
 print("modules:")
-for x in range(16):
-    for y in range(32):
+for x in range(cfg.tt.grid.x):
+    for y in range(cfg.tt.grid.y):
         print(f'  - name: "{args.module}"')
         print(f'    pg_vdd: false')
