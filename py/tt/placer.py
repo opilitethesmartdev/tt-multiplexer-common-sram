@@ -32,7 +32,15 @@ class ModuleSlot:
 		self.sram = cfg_data.get('sram', self.name in getattr(self.placer.cfg.tt, 'sram_modules', []))
 
 		if self.pg_vdd is True:
-			self.pg_vdd = 'hp' if self.width > 4 else 'll'
+			# Keep the size-based preference, but only select variants provided by this PDK.
+			preferred = 'hp' if self.width > 4 else 'll'
+			variants = getattr(self.placer.cfg.pdk.pwrgate.vdd, 'variants', None)
+			if variants is not None:
+				if not variants:
+					raise RuntimeError('No VDD power-gate variants configured for this PDK')
+				if preferred not in variants:
+					preferred = variants[0]
+			self.pg_vdd = preferred
 
 		if ((self.pos_x is None) and (self.pos_y is None) and
 		        ('mux_id' in cfg_data) and ('blk_id' in cfg_data)):
