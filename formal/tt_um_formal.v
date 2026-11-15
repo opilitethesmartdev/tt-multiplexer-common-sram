@@ -49,7 +49,7 @@ module tt_um_formal #(
             // if design is enabled, looped back inputs must = outputs
             if (N_O > 0) assert(ui_in == uo_out);
             // bidirectional outputs, only should match if oe is set
-            assert(uio_in == (uio_out & uio_oe));
+            assert(uio_in == (uio_out & (~uio_oe)));
         end else begin
             // otherwise inputs must be 0
             assert(ui_in == 0);
