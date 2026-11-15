@@ -9,6 +9,7 @@
 
 `default_nettype none
 `timescale 1ns / 100ps
+`include "tt_defs.vh"
 
 module tt_formal;
 
@@ -16,9 +17,9 @@ module tt_formal;
 	// -------
 
 	// DUT signals
-	wire [37:0] io_in;
-	wire [37:0] io_out;
-	wire [37:0] io_oex;
+	wire [43:0] io_in;
+	wire [43:0] io_out;
+	wire [43:0] io_oex;
 	wire        k_zero;
 	wire        k_one;
 
@@ -28,11 +29,13 @@ module tt_formal;
 
 	tt_top #(
 		.N_PADS (44),
-        .G_X    (16),
-		.G_Y    (24),
-		.N_IO   (8),
-		.N_O    (8),
-		.N_I    (10)
+		.G_X    (`TT_G_X),
+		.G_Y    (`TT_G_Y),
+		.N_AE   (`TT_N_AE),
+		.N_AU   (`TT_N_AU),
+		.N_IO   (`TT_N_IO),
+		.N_O    (`TT_N_O),
+		.N_I    (`TT_N_I)
 	) dut_I (
 		.io_in       (io_in),
 		.io_out      (io_out),
@@ -41,26 +44,12 @@ module tt_formal;
 		.k_one       (k_one)
 	);
 
-    /* 
-    IO in/out/oex is split like this:
-    io_oex is 'output enable X': polarity is tech dependent
-
-	31:24 user out
-	23:16 user io
-	   15 user rst
-	   14 user clk
-	   13 user in [7]
-	 6: 0 user in [6:0]
-
-
-    */
-
-    // loop back dedicated outs to ins
-    assign { io_in[13], io_in[6:0] } = io_out[31:24];
-
-    // loop back bidirectional outs to ins, depending on output enable
-    assign io_in[23:16] = io_out[23:16] & (~io_oex[23:16]);
-
+	// loop back bidirectional outs to ins, depending on output enable
+`ifdef OE_POLARITY_NEGATIVE
+	assign io_in[`TT_N_I + `TT_N_IO - 1 : `TT_N_I] = io_out[`TT_N_I + `TT_N_IO - 1 : `TT_N_I] & (~io_oex[`TT_N_I + `TT_N_IO - 1 : `TT_N_I]);
+`else
+	assign io_in[`TT_N_I + `TT_N_IO - 1 : `TT_N_I] = io_out[`TT_N_I + `TT_N_IO - 1 : `TT_N_I] & io_oex[`TT_N_I + `TT_N_IO - 1 : `TT_N_I];
+`endif
 
 endmodule // tt_formal
 

@@ -19,11 +19,11 @@ module tt_user_module #(
 	parameter integer BLK_ID = 0,
 
 	// Config
-	parameter integer N_AE   = 12,
-	parameter integer N_AU   = 8,
-	parameter integer N_IO   = 8,
-	parameter integer N_O    = 8,
-	parameter integer N_I    = 10,
+	parameter integer N_AE   = `TT_N_AE,
+	parameter integer N_AU   = `TT_N_AU,
+	parameter integer N_IO   = `TT_N_IO,
+	parameter integer N_O    = `TT_N_O,
+	parameter integer N_I    = `TT_N_I,
 	parameter integer N_SRAM_ADDR  = `TT_N_SRAM_ADDR,
 	parameter integer N_SRAM_DATA  = `TT_N_SRAM_DATA,
 	parameter integer N_SRAM_WMASK = `TT_N_SRAM_WMASK,
@@ -48,11 +48,11 @@ module tt_user_module #(
 );
 
 	wire [N_AU-1:0] ua;
-	wire [7:0] uio_in;
-	wire [7:0] uio_out;
-	wire [7:0] uio_oe;
-	wire [7:0] uo_out;
-	wire [7:0] ui_in;
+	wire [N_IO-1:0] uio_in;
+	wire [N_IO-1:0] uio_out;
+	wire [N_IO-1:0] uio_oe;
+	wire [N_O-1:0]  uo_out;
+	wire [N_I-1:0]  ui_in;
 	wire       clk;
 	wire       rst_n;
 	wire [N_SRAM_DATA-1:0]  sram_rdata;
@@ -62,7 +62,9 @@ module tt_user_module #(
 	wire [N_SRAM_ADDR-1:0]  sram_addr;
 	wire [N_SRAM_DATA-1:0]  sram_wdata;
 
-	assign { sram_rdata, uio_in, ui_in, rst_n, clk } = iw;
+	assign { sram_rdata, uio_in, ui_in } = iw;
+	assign clk   = ui_in[0];
+	assign rst_n = ui_in[1];
 	assign ow = { sram_wdata, sram_addr, sram_wmask, sram_we_n, sram_cs_n, uio_oe, uio_out, uo_out };
 
 	generate

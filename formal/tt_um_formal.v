@@ -8,30 +8,35 @@
  */
 
 `default_nettype none
+`include "tt_defs.vh"
 
-module tt_um_formal (
-	input  wire [7:0]  ui_in,	// Dedicated inputs
-	output wire [7:0]  uo_out,	// Dedicated outputs
-	input  wire [7:0]  uio_in,	// IOs: Input path
-	output wire [7:0]  uio_out,	// IOs: Output path
-	output wire [7:0]  uio_oe,	// IOs: Enable path (active high: 0=input, 1=output)
-	input  wire        ena,
-	input  wire        clk,
-	input  wire        rst_n,
-	output wire        sram_cs_n,
-	output wire        sram_we_n,
-	output wire [3:0]  sram_wmask,
-	output wire [8:0]  sram_addr,
-	output wire [31:0] sram_wdata,
-	input  wire [31:0] sram_rdata
+module tt_um_formal #(
+	parameter integer N_IO = `TT_N_IO,
+	parameter integer N_O  = `TT_N_O,
+	parameter integer N_I  = `TT_N_I
+)(
+	input  wire [N_I-1:0]  ui_in,	// Dedicated inputs
+	output wire [N_O-1:0]  uo_out,	// Dedicated outputs
+	input  wire [N_IO-1:0] uio_in,	// IOs: Input path
+	output wire [N_IO-1:0] uio_out,	// IOs: Output path
+	output wire [N_IO-1:0] uio_oe,	// IOs: Enable path (active high: 0=input, 1=output)
+	input  wire            ena,
+	input  wire            clk,
+	input  wire            rst_n,
+	output wire            sram_cs_n,
+	output wire            sram_we_n,
+	output wire [3:0]      sram_wmask,
+	output wire [8:0]      sram_addr,
+	output wire [31:0]     sram_wdata,
+	input  wire [31:0]     sram_rdata
 );
     
     // let solver drive the outputs
-    rand reg [7:0] anyseq1; assign uo_out   = anyseq1;
+    rand reg [N_O-1:0]  anyseq1; assign uo_out   = anyseq1;
     // bidirectional outputs
-    rand reg [7:0] anyseq2; assign uio_out  = anyseq2;
+    rand reg [N_IO-1:0] anyseq2; assign uio_out  = anyseq2;
     // bidirectional enables
-    rand reg [7:0] anyseq3; assign uio_oe   = anyseq3;
+    rand reg [N_IO-1:0] anyseq3; assign uio_oe   = anyseq3;
 
     rand reg        anyseq_cs_n;  assign sram_cs_n  = anyseq_cs_n;
     rand reg        anyseq_we_n;  assign sram_we_n  = anyseq_we_n;
@@ -42,7 +47,7 @@ module tt_um_formal (
     always @(*) begin
         if(ena) begin
             // if design is enabled, looped back inputs must = outputs
-            assert(ui_in == uo_out);
+            if (N_O > 0) assert(ui_in == uo_out);
             // bidirectional outputs, only should match if oe is set
             assert(uio_in == (uio_out & uio_oe));
         end else begin
