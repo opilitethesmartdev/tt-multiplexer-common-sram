@@ -1,35 +1,17 @@
 
 
- * 26 external user IOs pins :
+ * External User IOs & SRAM Interface :
 
-   - 10 dedicated inputs
-   -  8 dedicated outputs
-   -  8 bidirectional IOs
-
-   Results in :
-
-   - 18 input  lines on user module:
-     . 10 from dedicated inputs
-     .  8 from bidir
-  
-   - 24 output lines on user module
-     . 8 data to dedicated outputs
-     . 8 data to bidir
-     . 8 enables for bidir
-
-   - So 42 pins on the user module
-     . Need to find a way to force order / position so we can match
-       them to get straight / direct wiring
-
-   Rationale:
-
-   - Having bidir IOs is great for QSPI for instance, or I2C
-     Don't want to go overboard (3 lines per bidir IO) so 8
-     seemed not a bad compromise
-
-   - 2 more inputs for user clk/rst
-     While they are not treated different internally I thought it
-     would be useful to just have 2 more lines.
+   - 34 Bidirectional IOs (`uio[33:0]`)
+   -  2 Dedicated inputs for clock and reset (`clk` and `rst_n`)
+   -  2 Analog pins (`ana[1:0]`)
+   - Shared 512x32 SRAM Interface (`c4m_arrakeen_sram_512x32`):
+     . `sram_cs_n` (active low chip select)
+     . `sram_we_n` (active low write enable)
+     . `sram_wmask[3:0]` (4-bit byte write mask)
+     . `sram_addr[8:0]` (9-bit address for 512 entries)
+     . `sram_wdata[31:0]` (32-bit write data to SRAM)
+     . `sram_rdata[31:0]` (32-bit read data from SRAM)
 
 
  * Input path ( Controller -> User module ) :

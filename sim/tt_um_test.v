@@ -8,8 +8,13 @@
  */
 
 `default_nettype none
+`include "tt_defs.vh"
 
-module tt_um_test (
+module tt_um_test #(
+	parameter integer N_IO = `TT_N_IO,
+	parameter integer N_O  = `TT_N_O,
+	parameter integer N_I  = `TT_N_I
+)(
 	// Power
 `ifdef USE_POWER_PINS
 	input wire VDPWR,
@@ -18,20 +23,20 @@ module tt_um_test (
 `endif
 
 	// User interface
-	input  wire [7:0] ui_in,	// Dedicated inputs
-	output wire [7:0] uo_out,	// Dedicated outputs
-	input  wire [7:0] uio_in,	// IOs: Input path
-	output wire [7:0] uio_out,	// IOs: Output path
-	output wire [7:0] uio_oe,	// IOs: Enable path (active high: 0=input, 1=output)
-	input  wire       ena,
-	input  wire       clk,
-	input  wire       rst_n,
-	output wire        sram_cs_n,
-	output wire        sram_we_n,
-	output wire [3:0]  sram_wmask,
-	output wire [8:0]  sram_addr,
-	output wire [31:0] sram_wdata,
-	input  wire [31:0] sram_rdata
+	input  wire [N_I-1:0]  ui_in,	// Dedicated inputs
+	output wire [N_O-1:0]  uo_out,	// Dedicated outputs
+	input  wire [N_IO-1:0] uio_in,	// IOs: Input path
+	output wire [N_IO-1:0] uio_out,	// IOs: Output path
+	output wire [N_IO-1:0] uio_oe,	// IOs: Enable path (active high: 0=input, 1=output)
+	input  wire            ena,
+	input  wire            clk,
+	input  wire            rst_n,
+	output wire            sram_cs_n,
+	output wire            sram_we_n,
+	output wire [3:0]      sram_wmask,
+	output wire [8:0]      sram_addr,
+	output wire [31:0]     sram_wdata,
+	input  wire [31:0]     sram_rdata
 );
 
 	reg rst_n_i;
@@ -58,10 +63,10 @@ module tt_um_test (
 			cnt <= cnt + 1;
 			if (ena) begin
 				sram_cs_n_reg <= 1'b0;
-				sram_addr_reg <= {1'b0, ui_in};
+				sram_addr_reg <= {7'd0, ui_in};
 				if (uio_in[0]) begin
 					sram_we_n_reg  <= 1'b0;
-					sram_wdata_reg <= {24'hA5A5A5, ui_in};
+					sram_wdata_reg <= {30'h1234567, ui_in};
 				end else begin
 					sram_we_n_reg  <= 1'b1;
 				end
@@ -71,9 +76,9 @@ module tt_um_test (
 			end
 		end
 
-	assign uo_out  = ui_in[0] ? cnt : sram_rdata[7:0];
-	assign uio_out = ui_in[0] ? cnt : 8'h00;
-	assign uio_oe  = ui_in[0] ? 8'hff : 8'h00;
+	assign uo_out  = (N_O > 0) ? ((ui_in[0]) ? {N_O{1'b1}} : {N_O{1'b0}}) : {N_O{1'b0}};
+	assign uio_out = {N_IO{cnt[0]}};
+	assign uio_oe  = {N_IO{ena}};
 
 	assign sram_cs_n  = sram_cs_n_reg;
 	assign sram_we_n  = sram_we_n_reg;
