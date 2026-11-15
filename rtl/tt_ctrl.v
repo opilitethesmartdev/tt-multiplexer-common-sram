@@ -115,8 +115,15 @@ module tt_ctrl #(
 	wire   [N_O-1:0] mux_uo_out_n;
 
 	// Mapping
-	assign { so_gh[1], so_sram_wdata[1], so_sram_addr[1], so_sram_wmask[1], so_sram_we_n[1], so_sram_cs_n[1], so_uio_oe[1], so_uio_out[1], so_uo_out[1], so_gl[1] } = spine_top_ow;
-	assign { so_gh[0], so_sram_wdata[0], so_sram_addr[0], so_sram_wmask[0], so_sram_we_n[0], so_sram_cs_n[0], so_uio_oe[0], so_uio_out[0], so_uo_out[0], so_gl[0] } = spine_bot_ow;
+	generate
+		if (N_O > 0) begin : gen_so_uo_out_split
+			assign { so_gh[1], so_sram_wdata[1], so_sram_addr[1], so_sram_wmask[1], so_sram_we_n[1], so_sram_cs_n[1], so_uio_oe[1], so_uio_out[1], so_uo_out[1], so_gl[1] } = spine_top_ow;
+			assign { so_gh[0], so_sram_wdata[0], so_sram_addr[0], so_sram_wmask[0], so_sram_we_n[0], so_sram_cs_n[0], so_uio_oe[0], so_uio_out[0], so_uo_out[0], so_gl[0] } = spine_bot_ow;
+		end else begin : gen_no_so_uo_out_split
+			assign { so_gh[1], so_sram_wdata[1], so_sram_addr[1], so_sram_wmask[1], so_sram_we_n[1], so_sram_cs_n[1], so_uio_oe[1], so_uio_out[1], so_gl[1] } = spine_top_ow;
+			assign { so_gh[0], so_sram_wdata[0], so_sram_addr[0], so_sram_wmask[0], so_sram_we_n[0], so_sram_cs_n[0], so_uio_oe[0], so_uio_out[0], so_gl[0] } = spine_bot_ow;
+		end
+	endgenerate
 
 	// Protection diodes
 	tt_prim_diode spine_diode_I[2*S_OW-1:0] (
@@ -147,12 +154,16 @@ module tt_ctrl #(
 		.z ({ ibuf_uio_out_n[1], ibuf_uio_out_n[0] })
 	);
 
-	tt_prim_inv #(
-		.HIGH_DRIVE(0)
-	) uo_out_ibuf_I[2*N_O-1:0] (
-		.a ({     so_uo_out[1],     so_uo_out[0] }),
-		.z ({ ibuf_uo_out_n[1], ibuf_uo_out_n[0] })
-	);
+	generate
+		if (N_O > 0) begin : gen_uo_out_ibuf
+			tt_prim_inv #(
+				.HIGH_DRIVE(0)
+			) uo_out_ibuf_I[2*N_O-1:0] (
+				.a ({     so_uo_out[1],     so_uo_out[0] }),
+				.z ({ ibuf_uo_out_n[1], ibuf_uo_out_n[0] })
+			);
+		end
+	endgenerate
 
 	// Muxing
 	tt_prim_mux2 uio_oex_mux_I[N_IO-1:0](
@@ -169,12 +180,16 @@ module tt_ctrl #(
 		.s (side_sel)
 	);
 
-	tt_prim_mux2 uo_out_mux_I[N_O-1:0](
-		.a (ibuf_uo_out_n[0]),
-		.b (ibuf_uo_out_n[1]),
-		.x (mux_uo_out_n),
-		.s (side_sel)
-	);
+	generate
+		if (N_O > 0) begin : gen_uo_out_mux
+			tt_prim_mux2 uo_out_mux_I[N_O-1:0](
+				.a (ibuf_uo_out_n[0]),
+				.b (ibuf_uo_out_n[1]),
+				.x (mux_uo_out_n),
+				.s (side_sel)
+			);
+		end
+	endgenerate
 
 	tt_prim_mux2 sram_cs_n_mux_I (
 		.a (so_sram_cs_n[0]),
@@ -226,12 +241,16 @@ module tt_ctrl #(
 		.z (pad_uio_out)
 	);
 
-	tt_prim_inv #(
-		.HIGH_DRIVE(1)
-	) uo_out_obuf_I[N_O-1:0] (
-		.a (mux_uo_out_n),
-		.z (pad_uo_out)
-	);
+	generate
+		if (N_O > 0) begin : gen_uo_out_obuf
+			tt_prim_inv #(
+				.HIGH_DRIVE(1)
+			) uo_out_obuf_I[N_O-1:0] (
+				.a (mux_uo_out_n),
+				.z (pad_uo_out)
+			);
+		end
+	endgenerate
 
 	// Floating net prevention
 	generate
@@ -256,13 +275,23 @@ module tt_ctrl #(
 				.tx (tx)
 			);
 
-			tt_prim_tbuf #(
-				.HIGH_DRIVE(0)
-			) tbuf_spine_ow_I[S_OW-3:0] (
-				.a  (tie_zero),
-				.tx (tx),
-				.z  ({so_sram_wdata[i], so_sram_addr[i], so_sram_wmask[i], so_sram_we_n[i], so_sram_cs_n[i], so_uio_oe[i], so_uio_out[i], so_uo_out[i]})
-			);
+			if (N_O > 0) begin : gen_tbuf_ow
+				tt_prim_tbuf #(
+					.HIGH_DRIVE(0)
+				) tbuf_spine_ow_I[S_OW-3:0] (
+					.a  (tie_zero),
+					.tx (tx),
+					.z  ({so_sram_wdata[i], so_sram_addr[i], so_sram_wmask[i], so_sram_we_n[i], so_sram_cs_n[i], so_uio_oe[i], so_uio_out[i], so_uo_out[i]})
+				);
+			end else begin : gen_tbuf_ow
+				tt_prim_tbuf #(
+					.HIGH_DRIVE(0)
+				) tbuf_spine_ow_I[S_OW-3:0] (
+					.a  (tie_zero),
+					.tx (tx),
+					.z  ({so_sram_wdata[i], so_sram_addr[i], so_sram_wmask[i], so_sram_we_n[i], so_sram_cs_n[i], so_uio_oe[i], so_uio_out[i]})
+				);
+			end
 
 		end
 	endgenerate
