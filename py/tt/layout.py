@@ -474,25 +474,35 @@ class Layout:
 
 	def ctrl_layout(self):
 		# Config for up/down mapping of IO pads
-		# FIXME: Part of this should be from config and is sky130 specific
+		n_o  = self.cfg.tt.uio.o
+		n_i  = self.cfg.tt.uio.i
+		n_io = self.cfg.tt.uio.io
 
-		# Classify and order them up / down
-		bot_pads  = [
-			( 'o', 7, None ),
+		bot_pads = []
+		if n_o > 7:
+			bot_pads.append(('o', 7, None))
+
+		bot_pads.extend([
 			( 'ctrl_ena',       None, None ),
 			( 'ctrl_sel_inc',   None, None ),
 			( 'ctrl_sel_rst_n', None, None ),
 			( 'k_one',          None, None ),
 			( 'k_zero',         None, None ),
-			( 'i', 2, 8 ),
-		]
+		])
+		if n_i > 2:
+			bot_pads.append(('i', 2, min(8, n_i - 1)))
 
-		top_pads = [
-			(  'o', 6, 0 ),
-			( 'io', 7, 0 ),
-			(  'i', 1, 0 ),
-			(  'i', 9, None ),
-		]
+		top_pads = []
+		if n_o > 0:
+			top_pads.append(('o', min(6, n_o - 1), 0))
+
+		if n_io > 0:
+			top_pads.append(('io', n_io - 1, 0))
+
+		if n_i > 0:
+			top_pads.append(('i', min(1, n_i - 1), 0))
+		if n_i > 9:
+			top_pads.append(('i', 9, n_i - 1))
 
 		# Create expanded pins for each
 		def expand(l):
