@@ -128,13 +128,20 @@ class Layout:
 		glb.pg_vaa = LayoutNode()
 
 		# Size of the various busses
+		sram_addr  = getattr(self.cfg.tt.uio, 'sram_addr', 9)
+		sram_data  = getattr(self.cfg.tt.uio, 'sram_data', 32)
+		sram_wmask = getattr(self.cfg.tt.uio, 'sram_wmask', 4)
+
+		sram_ow = 1 + 1 + sram_wmask + sram_addr + sram_data if sram_data > 0 else 0
+		sram_iw = sram_data if sram_data > 0 else 0
+
 		self.vspine = ConfigNode({
-			'ow': self.cfg.tt.uio.o + self.cfg.tt.uio.io * 2 + 2,
-			'iw': self.cfg.tt.uio.i + self.cfg.tt.uio.io     + 9 + 1 + 2,
+			'ow': self.cfg.tt.uio.o + self.cfg.tt.uio.io * 2 + sram_ow + 2,
+			'iw': self.cfg.tt.uio.i + self.cfg.tt.uio.io     + sram_iw + 9 + 1 + 2,
 		})
 		self.user = ConfigNode({
-			'ow': self.cfg.tt.uio.o + self.cfg.tt.uio.io * 2,
-			'iw': self.cfg.tt.uio.i + self.cfg.tt.uio.io,
+			'ow': self.cfg.tt.uio.o + self.cfg.tt.uio.io * 2 + sram_ow,
+			'iw': self.cfg.tt.uio.i + self.cfg.tt.uio.io     + sram_iw,
 		})
 
 		# Margins
