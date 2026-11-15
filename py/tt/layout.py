@@ -189,9 +189,9 @@ class Layout:
 		avail_height -= self._align_y(self.cfg.pdk.die.margin.bottom, ceil=True)
 		avail_height -= self.cfg.pdk.die.margin.top
 
-			# Divide up assuming blocks are twice as high
-			# as the row-mux
-		HM_MUX = 1
+		# Divide up assuming blocks are twice as high
+		# as the row-mux
+		HM_MUX = 3
 		HM_BLK = 2
 
 		tmp_height = avail_height // (self.cfg.tt.grid.y // 2)
@@ -210,7 +210,7 @@ class Layout:
 		glb.top.pos_y = self._align_y((self.cfg.pdk.die.height - glb.top.height) // 2)
 
 			# Check mux is high enough for horizontal spine
-		hspine_tracks = self.user.iw + self.user.ow + 6 + 1 + 3
+		hspine_tracks = self.user.iw + self.user.ow + 23
 
 		hti = self.cfg.pdk.tracks[self.cfg.tt.spine.hlayer]
 		if glb.mux.height < (hspine_tracks * hti.y.pitch):
