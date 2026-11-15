@@ -35,8 +35,8 @@ class Router:
 		# Find useful data
 		tech = reader.db.getTech()
 
-		self.layer_h = tech.findLayer('met3')
-		self.layer_v = tech.findLayer('met4')
+		self.layer_h = tech.findLayer(tti.cfg.tt.spine.hlayer)
+		self.layer_v = tech.findLayer(tti.cfg.tt.spine.vlayer)
 		self.via     = tech.findVia('M3M4_PR')
 
 		self.x_spine = []
