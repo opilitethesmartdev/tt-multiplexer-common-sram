@@ -4,7 +4,7 @@
 
 This repository is a customized fork of the Tiny Tapeout multiplexer targeting the **GF180MCU** process node (`gf180mcuD`).
 
-## Key Modifications
+## Key Features
 
 1. **Shared SRAM Interface (`c4m-arrakeen` 512x32)**:
    - Configured the multiplexer to provide a shared **512x32 SRAM** memory interface (`c4m_arrakeen_sram_512x32`) to each user design slot.
@@ -17,10 +17,15 @@ This repository is a customized fork of the Tiny Tapeout multiplexer targeting t
      - `sram_rdata[31:0]`: 32-bit read data output from SRAM
    - Outward SRAM control and write lines are multiplexed across active branches to the central SRAM macro, and read data is routed back through zeroing buffers to the active design.
 
-2. **Bidirectional User IO Configuration**:
-   - Updated the user IO layout so that all general-purpose digital user IO pins (34 total) are **bidirectional** (`uio_in[33:0]`, `uio_out[33:0]`, `uio_oe[33:0]`).
-   - Retained 2 dedicated input pins for clock and reset (`clk` and `rst_n`) and 2 analog pins (`ana[1:0]`).
-   - Gives user modules complete flexibility to configure any user pin as an input, output, or tristate bidirectional line.
+2. **Standard Pinout (`main` branch)**:
+   - Preserves the default TinyTapeout pinout allocation for GF180MCU:
+     - 10 dedicated inputs (`ui_in[9:0]`)
+     - 8 dedicated outputs (`uo_out[7:0]`)
+     - 8 bidirectional IOs (`uio_in[7:0]`, `uio_out[7:0]`, `uio_oe[7:0]`)
+     - 22 analog external pins / 8 analog user pins
+
+3. **Experimental Branch (`experimental-all-bidir`)**:
+   - For a custom pinout variant where all general-purpose digital IOs are bidirectional, see the [`experimental-all-bidir`](https://github.com/opilitethesmartdev/tt-multiplexer-common-sram/tree/experimental-all-bidir) branch.
 
 ## Overview & Architecture
 

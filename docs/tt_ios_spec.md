@@ -2,9 +2,10 @@
 
  * External User IOs & SRAM Interface :
 
-   - 34 Bidirectional IOs (`uio[33:0]`)
-   -  2 Dedicated inputs for clock and reset (`clk` and `rst_n`)
-   -  2 Analog pins (`ana[1:0]`)
+   - 10 Dedicated inputs (`ui[9:0]`)
+   -  8 Dedicated outputs (`uo[7:0]`)
+   -  8 Bidirectional IOs (`uio[7:0]`)
+   - 22 Analog external pins (`ana[21:0]`)
    - Shared 512x32 SRAM Interface (`c4m_arrakeen_sram_512x32`):
      . `sram_cs_n` (active low chip select)
      . `sram_we_n` (active low write enable)

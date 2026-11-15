@@ -81,11 +81,11 @@ tt:
     x: 4
     y: 1
   uio:
-    ae:  2
-    au:  2
-    i:   2
-    o:   0
-    io: 34
+    ae: 12
+    au:  8
+    i:  10
+    o:   8
+    io:  8
     sram_addr: 9
     sram_data: 32
     sram_wmask: 4
