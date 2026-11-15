@@ -26,7 +26,7 @@ def place_pin(die_area, layer, bterm, pos, side='N', width=None, length=None):
 	WIDTH  = tt.LayoutDimension(width  or  300).iu
 	LENGTH = tt.LayoutDimension(length or 1000).iu
 
-	pos = pos.iu
+	pos = pos.iu if hasattr(pos, 'iu') else pos
 
 	if side == 'N':
 		rect = odb.Rect(0, 0, WIDTH, LENGTH)
