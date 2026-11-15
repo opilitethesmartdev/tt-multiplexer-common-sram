@@ -13,15 +13,10 @@
 module tt_prim_mux2 (
 	input  wire a,
 	input  wire b,
-	output reg  x,
+	output wire x,
 	input  wire s
 );
 
-	always @(*)
-		case (s)
-			1'b0:   x = a;
-			1'b1:   x = b;
-			default: x = 1'bx;
-		endcase
+	assign x = s ? b : a;
 
 endmodule // tt_prim_mux2
