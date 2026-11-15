@@ -62,7 +62,9 @@ module tt_user_module #(
 	wire [N_SRAM_ADDR-1:0]  sram_addr;
 	wire [N_SRAM_DATA-1:0]  sram_wdata;
 
-	assign { sram_rdata, uio_in, ui_in, rst_n, clk } = iw;
+	assign { sram_rdata, uio_in, ui_in } = iw;
+	assign clk   = ui_in[0];
+	assign rst_n = ui_in[1];
 	assign ow = { sram_wdata, sram_addr, sram_wmask, sram_we_n, sram_cs_n, uio_oe, uio_out, uo_out };
 
 	generate
