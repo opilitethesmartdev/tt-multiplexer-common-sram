@@ -74,8 +74,9 @@ module tt_top_tb;
 	assign io_in[39] = ctrl_sel_inc;
 	assign io_in[38] = ctrl_ena;
 
-	assign io_in[0] = clk_b;      // u_clk
-	assign io_in[1] = um_rst_cnt[3]; // u_rst
+	assign io_in[14] = clk_b;
+	assign io_in[15] = um_rst_cnt[3];
+	assign io_in[ 0] = 1'b1;
 
 
 	always @(negedge io_out[5])
