@@ -1,19 +1,35 @@
 
 
- * External User IOs & SRAM Interface :
+ * Standard Pinout Configuration (`main` branch) :
 
-   - 10 Dedicated inputs (`ui[9:0]`)
-   -  8 Dedicated outputs (`uo[7:0]`)
-   -  8 Bidirectional IOs (`uio[7:0]`)
-   - 22 Analog external pins (`ana[21:0]`)
-   - Shared 512x32 SRAM Interface (`c4m_arrakeen_sram_512x32`):
-     . `sram_cs_n` (active low chip select)
-     . `sram_we_n` (active low write enable)
-     . `sram_wmask[3:0]` (4-bit byte write mask)
-     . `sram_addr[8:0]` (9-bit address for 512 entries)
-     . `sram_wdata[31:0]` (32-bit write data to SRAM)
-     . `sram_rdata[31:0]` (32-bit read data from SRAM)
+   - **10 Dedicated Inputs**: `ui[9:0]`
+     - These pins are dedicated inputs to the user project. They are multiplexed through the TinyTapeout control logic.
+   - **8 Dedicated Outputs**: `uo[7:0]`
+     - These pins are dedicated outputs from the user project. They are multiplexed through tristate buffers.
+   - **8 Bidirectional I/Os**: `uio[7:0]`
+     - These pins can be configured as inputs, outputs, or tristate bidirectional lines by the user project. `uio_oe` controls the output enable.
+   - **22 Analog External Pins**: `ana[21:0]`
+     - These pins are available for analog functionalities, typically connected to external analog components.
+   - **Mux Control Inputs**: Three dedicated inputs (`ctrl_ena`, `ctrl_sel_inc`, `ctrl_sel_rst_n`) are used to control the multiplexer and select the active user design. These are separate from the user-accessible `ui` signals.
 
+ * Shared SRAM Interface (`c4m_arrakeen_sram_512x32`) :
+   - `sram_cs_n` (active low chip select)
+   - `sram_we_n` (active low write enable)
+   - `sram_wmask[3:0]` (4-bit byte write mask)
+   - `sram_addr[8:0]` (9-bit address for 512 entries)
+   - `sram_wdata[31:0]` (32-bit write data to SRAM)
+   - `sram_rdata[31:0]` (32-bit read data from SRAM)
+
+
+ * Experimental Pinout Configuration (`experimental-all-bidir` branch) :
+
+   - **34 Bidirectional I/Os**: `uio[33:0]`
+     - In this experimental configuration, nearly all general-purpose digital pins are made bidirectional, offering maximum flexibility. `uio_oe` controls the output enable.
+   - **2 Dedicated Inputs**: `clk` and `rst_n`
+     - These pins are dedicated for clock and reset signals.
+   - **2 Analog Pins**: `ana[1:0]`
+     - These pins are available for analog functionalities.
+   - **Mux Control Inputs**: Three dedicated inputs (`ctrl_ena`, `ctrl_sel_inc`, `ctrl_sel_rst_n`) are used to control the multiplexer and select the active user design. These are separate from the user-accessible `ui` signals.
 
  * Input path ( Controller -> User module ) :
 
