@@ -339,18 +339,38 @@ class Layout:
 
 	def userif_layout(self):
 
+		sram_addr  = getattr(self.cfg.tt.uio, 'sram_addr', 9)
+		sram_data  = getattr(self.cfg.tt.uio, 'sram_data', 32)
+		sram_wmask = getattr(self.cfg.tt.uio, 'sram_wmask', 4)
+
+		sram_ow = 1 + 1 + sram_wmask + sram_addr + sram_data if sram_data > 0 else 0
+		sram_iw = sram_data if sram_data > 0 else 0
+
 		# Pin Layouts
-		block_ply = [
-			(None,      3),	# pg_ena, pg_cscd, k_zero not mapped
+		block_ply = []
+		block_ply.append((None, 3))	# pg_ena, pg_cscd, k_zero not mapped
+		if sram_data > 0:
+			block_ply.extend([
+				('sram_wdata', sram_data),
+				('sram_addr',  sram_addr),
+				('sram_wmask', sram_wmask),
+				('sram_we_n',  None),
+				('sram_cs_n',  None),
+			])
+		block_ply.extend([
 			('uio_oe',  self.cfg.tt.uio.io),
 			('uio_out', self.cfg.tt.uio.io),
 			('uo_out',  self.cfg.tt.uio.o),
+		])
+		if sram_iw > 0:
+			block_ply.append(('sram_rdata', sram_iw))
+		block_ply.extend([
 			('uio_in',  self.cfg.tt.uio.io),
-			('ui_in',   self.cfg.tt.uio.i - 2),
+			('ui_in',   self.cfg.tt.uio.i - 2 if self.cfg.tt.uio.i >= 2 else 0),
 			('rst_n',   None),
 			('clk',     None),
 			('ena',     None),
-		]
+		])
 
 		mux_ply = lambda n: [
 			('um_pg_ena', (n, 1)),
