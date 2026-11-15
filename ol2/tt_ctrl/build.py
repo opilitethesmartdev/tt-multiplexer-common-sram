@@ -125,7 +125,7 @@ if __name__ == '__main__':
 		"VERILOG_FILES"        : verilog_files,
 
 		# Constraints
-		"SIGNOFF_SDC_FILE" : "dir::signoff.sdc",
+		"SIGNOFF_SDC_FILE" : "dir::" + signoff_sdc_file,
 
 		# Synthesis
 		"SYNTH_READ_BLACKBOX_LIB"     : True,
