@@ -18,11 +18,12 @@ This repository is a customized fork of the Tiny Tapeout multiplexer targeting t
    - Outward SRAM control and write lines are multiplexed across active branches to the central SRAM macro, and read data is routed back through zeroing buffers to the active design.
 
 2. **Standard Pinout (`main` branch)**:
-   - Preserves the default TinyTapeout pinout allocation for GF180MCU:
-     - 10 dedicated inputs (`ui_in[9:0]`)
-     - 8 dedicated outputs (`uo_out[7:0]`)
-     - 8 bidirectional IOs (`uio_in[7:0]`, `uio_out[7:0]`, `uio_oe[7:0]`)
-     - 22 analog external pins / 8 analog user pins
+   - Preserves the default TinyTapeout pinout allocation for GF180MCU, including the following user-accessible signals:
+     - **10 Dedicated Inputs**: `ui_in[9:0]` (including `u_clk` and `u_rst_n`)
+     - **8 Dedicated Outputs**: `uo_out[7:0]`
+     - **8 Bidirectional I/Os**: `uio_in[7:0]`, `uio_out[7:0]`, `uio_oe[7:0]` (output enable)
+     - **Analog Pins**: 22 external analog pins (`analog[21:0]`) and 8 internal user-accessible analog pins.
+   - **Mux Control Inputs**: Three dedicated inputs (`ctrl_ena`, `ctrl_sel_inc`, `ctrl_sel_rst_n`) are used to control the multiplexer and select the active user design. These are separate from the user-accessible `ui_in` signals.
 
 3. **Experimental Branch (`experimental-all-bidir`)**:
    - For a custom pinout variant where all general-purpose digital IOs are bidirectional, see the [`experimental-all-bidir`](https://github.com/opilitethesmartdev/tt-multiplexer-common-sram/tree/experimental-all-bidir) branch.
