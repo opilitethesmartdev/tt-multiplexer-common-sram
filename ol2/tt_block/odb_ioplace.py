@@ -24,7 +24,7 @@ def io_place(
 ):
 
 	# Load TinyTapeout
-	ti = tt.TinyTapeout(modules=False)
+	tti = tt.TinyTapeout(modules=False)
 
 	# Terminal name mapping
 	bterm_map = {b.getName(): b for b in reader.block.getBTerms()}
