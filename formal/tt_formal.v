@@ -31,6 +31,8 @@ module tt_formal;
 		.N_PADS (44),
 		.G_X    (`TT_G_X),
 		.G_Y    (`TT_G_Y),
+		.N_AE   (`TT_N_AE),
+		.N_AU   (`TT_N_AU),
 		.N_IO   (`TT_N_IO),
 		.N_O    (`TT_N_O),
 		.N_I    (`TT_N_I)

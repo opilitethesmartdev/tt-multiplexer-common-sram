@@ -9,6 +9,7 @@
 
 `default_nettype none
 `timescale 1ns / 100ps
+`include "tt_defs.vh"
 
 module tt_top_tb;
 
@@ -46,11 +47,13 @@ module tt_top_tb;
 
 	tt_top #(
 		.N_PADS (44),
-		.G_X    (16),
-		.G_Y    (32),
-		.N_IO   (8),
-		.N_O    (8),
-		.N_I    (10)
+		.G_X    (`TT_G_X),
+		.G_Y    (`TT_G_Y),
+		.N_AE   (`TT_N_AE),
+		.N_AU   (`TT_N_AU),
+		.N_IO   (`TT_N_IO),
+		.N_O    (`TT_N_O),
+		.N_I    (`TT_N_I)
 	) dut_I (
 `ifdef USE_POWER_PINS
 		.VDPWR       (1'b1),
@@ -71,9 +74,8 @@ module tt_top_tb;
 	assign io_in[39] = ctrl_sel_inc;
 	assign io_in[38] = ctrl_ena;
 
-	assign io_in[14] = clk_b;
-	assign io_in[15] = um_rst_cnt[3];
-	assign io_in[ 0] = 1'b1;
+	assign io_in[0] = clk_b;      // u_clk
+	assign io_in[1] = um_rst_cnt[3]; // u_rst
 
 
 	always @(negedge io_out[5])
