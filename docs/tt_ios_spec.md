@@ -2,15 +2,15 @@
 
  * Standard Pinout Configuration (`main` branch) :
 
-   - **10 Dedicated Inputs**: `ui[9:0]`
+   - **10 Dedicated Inputs**: `ui[9:0]` (comprising `u_clk` on `ui[0]`, `u_rst_n` on `ui[1]`, and 8 general-purpose inputs on `ui[9:2]`).
      - These pins are dedicated inputs to the user project. They are multiplexed through the TinyTapeout control logic.
-   - **8 Dedicated Outputs**: `uo[7:0]`
+   - **8 Dedicated Outputs**: `uo[7:0]`.
      - These pins are dedicated outputs from the user project. They are multiplexed through tristate buffers.
-   - **8 Bidirectional I/Os**: `uio[7:0]`
+   - **8 Bidirectional I/Os**: `uio[7:0]`.
      - These pins can be configured as inputs, outputs, or tristate bidirectional lines by the user project. `uio_oe` controls the output enable.
-   - **22 Analog External Pins**: `ana[21:0]`
+   - **22 Analog External Pins**: `ana[21:0]`.
      - These pins are available for analog functionalities, typically connected to external analog components.
-   - **Mux Control Inputs**: Three dedicated inputs (`ctrl_ena`, `ctrl_sel_inc`, `ctrl_sel_rst_n`) are used to control the multiplexer and select the active user design. These are separate from the user-accessible `ui` signals.
+   - **Mux Control Inputs**: Three dedicated inputs (`ctrl_ena`, `ctrl_sel_inc`, `ctrl_sel_rst_n`) are used to control the multiplexer and select the active user design. These are entirely separate from the user-accessible `ui` signals.
 
  * Shared SRAM Interface (`c4m_arrakeen_sram_512x32`) :
    - `sram_cs_n` (active low chip select)
