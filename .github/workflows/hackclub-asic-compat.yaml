@@ -1,0 +1,71 @@
+name: Hack Club ASIC compatibility
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mux-rtl:
+    runs-on: ubuntu-24.04
+    env:
+      PDK: gf180mcuD
+      PDK_ROOT: ${{ github.workspace }}/hackclub-asic-pg/.ciel
+      PDK_VERSION: 1689ac3f2dc763876eaf967227c7dfe831b031ae
+      TT_CONFIG: gf180mcuD.yaml
+
+    steps:
+      - name: Checkout Hack Club ASIC project
+        uses: actions/checkout@v6
+        with:
+          repository: opilitethesmartdev/hackclub-asic-pg
+          ref: main
+          submodules: recursive
+          path: hackclub-asic-pg
+
+      - name: Use this multiplexer revision in the local submodule checkout
+        working-directory: hackclub-asic-pg/tt-multiplexer
+        run: |
+          git fetch --depth=1 origin main
+          git checkout --detach FETCH_HEAD
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: |
+            hackclub-asic-pg/tt/requirements.txt
+            hackclub-asic-pg/tt-multiplexer/py/requirements.txt
+            hackclub-asic-pg/verilog/dv/mux/requirements.txt
+
+      - name: Install Python requirements
+        working-directory: hackclub-asic-pg
+        run: pip install -r tt/requirements.txt -r tt-multiplexer/py/requirements.txt -r verilog/dv/mux/requirements.txt
+
+      - name: Install Icarus Verilog
+        run: sudo apt-get update && sudo apt-get install -y iverilog
+
+      - name: Enable GF180 PDK via ciel
+        working-directory: hackclub-asic-pg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pip install ciel==2.5.0
+          ciel enable --pdk gf180mcu $PDK_VERSION -l default -l gf180mcu_ocd_io
+
+      - name: Configure the multiplexer for testing
+        working-directory: hackclub-asic-pg
+        run: python ./tt/configure.py --update-shuttle --test
+
+      - name: Run multiplexer simulation
+        working-directory: hackclub-asic-pg/verilog/dv/mux
+        env:
+          EXPECTED_REPO: opilitethesmartdev/hackclub-asic-pg
+        run: |
+          make clean test_mux
+          ! grep failure results.xml
