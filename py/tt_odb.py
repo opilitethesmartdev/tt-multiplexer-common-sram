@@ -18,8 +18,23 @@ def place_pin(die_area, layer, bterm, pos, side='N', width=None, length=None):
 	BLOCK_UR_X = die_area.xMax()
 	BLOCK_UR_Y = die_area.yMax()
 
-	# Create pin
-	bpin = odb.dbBPin_create(bterm)
+	# Create or reuse pin
+	bpins = bterm.getBPins()
+	if bpins:
+		bpin = bpins[0]
+		for p in bpins[1:]:
+			try:
+				odb.dbBPin_destroy(p)
+			except Exception:
+				pass
+		for box in bpin.getBoxes():
+			try:
+				odb.dbBox_destroy(box)
+			except Exception:
+				pass
+	else:
+		bpin = odb.dbBPin_create(bterm)
+
 	bpin.setPlacementStatus("PLACED")
 
 	# Rectangle graphic
