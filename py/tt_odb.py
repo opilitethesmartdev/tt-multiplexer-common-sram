@@ -11,7 +11,7 @@ import tt
 import odb
 
 
-def place_pin(die_area, layer, bterm, pos, side='N', width=None, length=None):
+def place_pin(die_area, layer, bterm, pos, side='N', width=None, length=None, manufacturing_grid=1):
 	# Get limits
 	BLOCK_LL_X = die_area.xMin()
 	BLOCK_LL_Y = die_area.yMin()
@@ -69,6 +69,23 @@ def place_pin(die_area, layer, bterm, pos, side='N', width=None, length=None):
 
 	else:
 		raise RuntimeError('Invalid pin position')
+
+	# OpenROAD's detailed router requires every pin-shape coordinate to
+	# lie on the PDK manufacturing grid. Integer placement coordinates
+	# generated from evenly divided die dimensions are not necessarily
+	# grid-aligned, so snap the final rectangle edges rather than only
+	# snapping the pin centre (which may still leave half-width offsets).
+	grid = int(manufacturing_grid or 1)
+	if grid > 1:
+		def snap(value):
+			return ((value + grid // 2) // grid) * grid
+
+		rect = odb.Rect(
+			snap(rect.xMin()),
+			snap(rect.yMin()),
+			snap(rect.xMax()),
+			snap(rect.yMax()),
+		)
 
 	# Add to OpenDB
 	odb.dbBox_create(bpin, layer, *rect.ll(), *rect.ur())

@@ -24,14 +24,15 @@ def io_place(
 ):
 
 	# Load TinyTapeout
-	tti = tt.TinyTapeout(modules=False)
+	ti = tt.TinyTapeout(modules=False)
 
 	# Terminal name mapping
 	bterm_map = {b.getName(): b for b in reader.block.getBTerms()}
 
-	# Find die & layers
+	# Find die, layer, and the PDK's manufacturing grid
 	die_area = reader.block.getDieArea()
 	layer_ns = reader.tech.findLayer(tti.cfg.tt.spine.vlayer)
+	manufacturing_grid = reader.tech.getManufacturingGrid()
 
 	# Adjust pin position (in case there is a power gate)
 	pin_ofs = tt.LayoutDimension.from_iu(die_area.xMax() - die_area.xMin())
@@ -41,13 +42,13 @@ def io_place(
 
 	# User block to mux
 	for pn, pp in tti.layout.ply_block.items():
-		tt_odb.place_pin(die_area, layer_ns, bterm_map.pop(pn), pp + pin_ofs, 'N')
+		tt_odb.place_pin(die_area, layer_ns, bterm_map.pop(pn), pp + pin_ofs, 'N', manufacturing_grid=manufacturing_grid)
 
 	# User block analog (optional pins !)
 	for pn, pp in tti.layout.ply_block_analog.items():
 		if pn not in bterm_map:
 			continue
-		tt_odb.place_pin(die_area, layer_ns, bterm_map.pop(pn), pp + pin_ofs, 'S', width=tti.cfg.pdk.analog.pad.width)
+		tt_odb.place_pin(die_area, layer_ns, bterm_map.pop(pn), pp + pin_ofs, 'S', width=tti.cfg.pdk.analog.pad.width, manufacturing_grid=manufacturing_grid)
 
 
 if __name__ == "__main__":
