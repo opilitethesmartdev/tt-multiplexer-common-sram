@@ -207,6 +207,28 @@ if __name__ == '__main__':
 		'tt_gf_wrapper' if tti.cfg.pdk.name == 'gf180mcuD' else 'openframe_project_wrapper'
 	)
 
+	# The shared wrapper DEF is authored for SKY130. For GF180, retain its
+	# special power/ground pin locations, but translate the technology and
+	# routing-layer names. Signal-pin mismatches are handled permissively below
+	# and the 74 raw pads are placed by Odb.CustomIOPlacement.
+	def_template = 'openframe_project_wrapper.def'
+	if tti.cfg.pdk.name == 'gf180mcuD':
+		def_template = 'tt_gf_wrapper.def'
+		def_text = pathlib.Path('openframe_project_wrapper.def').read_text()
+		def_replacements = (
+			('DESIGN openframe_project_wrapper ;', 'DESIGN tt_gf_wrapper ;'),
+			('TECHNOLOGY sky130A ;', 'TECHNOLOGY gf180mcuD ;'),
+			('LAYER met2 ', 'LAYER Metal2 '),
+			('LAYER met3 ', 'LAYER Metal3 '),
+		)
+		for old, new in def_replacements:
+			if old not in def_text:
+				raise RuntimeError(f'Expected GF180 DEF template token not found: {old}')
+			def_text = def_text.replace(old, new)
+		if 'LAYER met2 ' in def_text or 'LAYER met3 ' in def_text:
+			raise RuntimeError('GF180 DEF template still contains SKY130 routing layer names')
+		pathlib.Path(def_template).write_text(def_text)
+
 	# Custom config
 	flow_cfg = {
 		# Main design properties
@@ -293,6 +315,9 @@ if __name__ == '__main__':
 	# their physical pad order instead.
 	if tti.cfg.pdk.name == "gf180mcuD":
 		flow_cfg.update({
+			"FP_DEF_TEMPLATE": "dir::tt_gf_wrapper.def",
+			"FP_TEMPLATE_MATCH_MODE": "permissive",
+			"FP_TEMPLATE_COPY_POWER_PINS": True,
 			"IO_PIN_ORDER_CFG": "dir::gf180_pin_order.cfg",
 			"IO_PIN_H_LAYER": "Metal3",
 			"IO_PIN_V_LAYER": "Metal2",
