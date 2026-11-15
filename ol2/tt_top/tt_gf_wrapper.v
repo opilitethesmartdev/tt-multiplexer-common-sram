@@ -29,21 +29,21 @@ module tt_gf_wrapper (
 	// Control pads (0..5)
 	assign io_in[43:38] = pad_raw[5:0];
 
-	// Analog pads (6..17)
+	// Analog-capable pads
 	assign io_in[37:32] = pad_raw[32:27];
-	assign io_in[11:6]  = pad_raw[24:19];
+	assign io_in[12:7]  = pad_raw[24:19];
 
-	// Outputs (18..25)
-	assign io_in[25:18] = pad_raw[16:9];
+	// Dedicated outputs (uo[7:0])
+	assign io_in[31:24] = pad_raw[16:9];
 
-	// Bidirectional IOs (26..33)
-	assign io_in[33:26] = pad_raw[44:37];
+	// Bidirectional IOs (uio[7:0])
+	assign io_in[23:16] = pad_raw[44:37];
 
-	// Inputs (34..43)
-	assign io_in[1] = pad_raw[54]; // u_rst_n
-	assign io_in[0] = pad_raw[55]; // u_clk
-	assign io_in[9] = pad_raw[46];
-	assign io_in[8:2] = pad_raw[53:47];
+	// Dedicated inputs plus clock and reset
+	assign io_in[15]   = pad_raw[54]; // u_rst_n
+	assign io_in[14]   = pad_raw[55]; // u_clk
+	assign io_in[13]   = pad_raw[53]; // ui_in[7]
+	assign io_in[6:0]  = pad_raw[52:46]; // ui_in[6:0]
 
 	// Expose the twelve analog-capable pads used by tt_top.
 	// Keep both directions connected so user analog switches can pass
@@ -53,10 +53,10 @@ module tt_gf_wrapper (
 	assign io_ana[37:32] = pad_raw[32:27];
 	assign pad_raw[32:27] = io_ana[37:32];
 
-	// Drive output and bidirectional pads only when their output enables
-	// are asserted. GF180 uses active-high output enables.
-	assign pad_raw[16:9] = io_oex[25:18] ? io_out[25:18] : 8'bz;
-	assign pad_raw[44:37] = io_oex[33:26] ? io_out[33:26] : 8'bz;
+	// Drive dedicated output and bidirectional pads only when enabled.
+	// GF180 uses active-high output enables.
+	assign pad_raw[16:9]  = io_oex[31:24] ? io_out[31:24] : 8'bz;
+	assign pad_raw[44:37] = io_oex[23:16] ? io_out[23:16] : 8'bz;
 
 	tt_top top_I (
 `ifdef USE_POWER_PINS
