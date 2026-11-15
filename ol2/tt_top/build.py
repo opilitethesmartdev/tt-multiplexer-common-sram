@@ -213,6 +213,7 @@ if __name__ == '__main__':
 		"DESIGN_IS_CORE" : False,
 
 		# Sources
+		"VERILOG_INCLUDE_DIRS" : [ "dir::../../rtl/" ],
 		"VERILOG_FILES": [
 			f"dir::{design_name}.v",
 			"dir::../../rtl/tt_top.v",
