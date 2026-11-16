@@ -82,10 +82,6 @@ module tt_top #(
 	wire  [S_IW-1:0] spine_bot_iw;
 
 	// The SRAM bus bypasses tt_ctrl; only the selected-side control crosses it.
-	wire [S_OW+N_SRAM_OW-1:0] spine_top_ow_full;
-	wire [S_IW+N_SRAM_IW-1:0] spine_top_iw_full;
-	wire [S_OW+N_SRAM_OW-1:0] spine_bot_ow_full;
-	wire [S_IW+N_SRAM_IW-1:0] spine_bot_iw_full;
 	wire [N_SRAM_OW-1:0] spine_top_sram_ow;
 	wire [N_SRAM_OW-1:0] spine_bot_sram_ow;
 	wire sram_side_sel;
