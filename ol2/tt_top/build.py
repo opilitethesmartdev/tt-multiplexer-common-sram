@@ -63,6 +63,26 @@ class CustomRoute(OdbpyStep):
 		)
 
 
+@Step.factory.register()
+class OptionalManualMacroPlacement(Odb.ManualMacroPlacement):
+	"""Place all macros present in the synthesized design.
+
+	TinyTapeout's geometric layout can include optional power-gate instances
+	that synthesis removes when the corresponding user block is not powered.
+	Those absent instances have nothing to place, so skip them while still
+	placing every macro instance that survives synthesis.
+	"""
+
+	id = "TT.Top.OptionalManualMacroPlacement"
+	name = "Manual Macro Placement (skip absent optional instances)"
+
+	def get_script_path(self):
+		return os.path.join(
+			os.path.dirname(__file__),
+			"odb_manual_macro_placement.py"
+		)
+
+
 class TopFlow(SequentialFlow):
 
 	Steps: List[Type[Step]] = [
@@ -73,7 +93,7 @@ class TopFlow(SequentialFlow):
 		OpenROAD.Floorplan,
 		Odb.ApplyDEFTemplate,
 		Odb.CustomIOPlacement,
-		Odb.ManualMacroPlacement,
+		OptionalManualMacroPlacement,
 		CustomPower,
 		OpenROAD.GeneratePDN,
 		OpenROAD.GlobalPlacement,
@@ -218,6 +238,9 @@ if __name__ == '__main__':
 		def_replacements = (
 			('DESIGN openframe_project_wrapper ;', 'DESIGN tt_gf_wrapper ;'),
 			('TECHNOLOGY sky130A ;', 'TECHNOLOGY gf180mcuD ;'),
+			# SKY130's template uses 1000 DEF units/µm; GF180 uses 2000.
+			# Keep the physical die and inherited power-pin coordinates unchanged.
+			('UNITS DISTANCE MICRONS 1000 ;', 'UNITS DISTANCE MICRONS 2000 ;'),
 			('LAYER met2 ', 'LAYER Metal2 '),
 			('LAYER met3 ', 'LAYER Metal3 '),
 		)
@@ -227,6 +250,8 @@ if __name__ == '__main__':
 			def_text = def_text.replace(old, new)
 		if 'LAYER met2 ' in def_text or 'LAYER met3 ' in def_text:
 			raise RuntimeError('GF180 DEF template still contains SKY130 routing layer names')
+		if 'UNITS DISTANCE MICRONS 1000 ;' in def_text:
+			raise RuntimeError('GF180 DEF template still uses SKY130 DBU scaling')
 		pathlib.Path(def_template).write_text(def_text)
 
 	# Custom config
