@@ -42,8 +42,8 @@ module tt_top #(
 	localparam integer N_SRAM_OW = `TT_SRAM_OW;
 	localparam integer N_SRAM_IW = `TT_SRAM_IW;
 
-	localparam integer S_OW = N_O + N_IO * 2 + N_SRAM_OW + 2;
-	localparam integer S_IW = N_I + N_IO + N_SRAM_IW + 9 + 1 + 2;
+	localparam integer S_OW = N_O + N_IO * 2 + 2;
+	localparam integer S_IW = N_I + N_IO + 9 + 1 + 2;
 
 	localparam integer U_OW = N_O + N_IO * 2 + N_SRAM_OW;
 	localparam integer U_IW = N_I + N_IO + N_SRAM_IW;
@@ -80,6 +80,15 @@ module tt_top #(
 
 	wire  [S_OW-1:0] spine_bot_ow;
 	wire  [S_IW-1:0] spine_bot_iw;
+
+	// The SRAM bus bypasses tt_ctrl; only the selected-side control crosses it.
+	wire [S_OW+N_SRAM_OW-1:0] spine_top_ow_full;
+	wire [S_IW+N_SRAM_IW-1:0] spine_top_iw_full;
+	wire [S_OW+N_SRAM_OW-1:0] spine_bot_ow_full;
+	wire [S_IW+N_SRAM_IW-1:0] spine_bot_iw_full;
+	wire [N_SRAM_OW-1:0] spine_top_sram_ow;
+	wire [N_SRAM_OW-1:0] spine_bot_sram_ow;
+	wire sram_side_sel;
 
 	// Common SRAM interface
 	wire [N_SRAM_OW-1:0] sram_ow;
@@ -198,8 +207,7 @@ module tt_top #(
 		.spine_top_iw   (spine_top_iw),
 		.spine_bot_ow   (spine_bot_ow),
 		.spine_bot_iw   (spine_bot_iw),
-		.sram_ow        (sram_ow),
-		.sram_iw        (sram_iw),
+		.sram_side_sel  (sram_side_sel),
 		.ctrl_sel_rst_n (ctrl_sel_rst_n),
 		.ctrl_sel_inc   (ctrl_sel_inc),
 		.ctrl_ena       (ctrl_ena),
@@ -210,6 +218,10 @@ module tt_top #(
 
 	// Common Arrakeen SRAM
 	// --------------------
+
+	assign sram_ow = ctrl_ena
+		? (sram_side_sel ? spine_top_sram_ow : spine_bot_sram_ow)
+		: {N_SRAM_OW{1'b0}};
 
 	assign {sram_cs, sram_we, sram_wmask, sram_addr, sram_wdata} = sram_ow;
 	assign sram_we_lo = {`TT_SRAM_WMASK{sram_cs & sram_we & ~sram_addr[8]}} & sram_wmask;
@@ -257,8 +269,8 @@ module tt_top #(
 		if (~MUX_MASK[i])
 		begin : check_mask
 			// Signals
-			wire [S_OW-1:0] l_spine_ow;
-			wire [S_IW-1:0] l_spine_iw;
+			wire [S_OW+N_SRAM_OW-1:0] l_spine_ow;
+			wire [S_IW+N_SRAM_IW-1:0] l_spine_iw;
 
 			wire [(U_OW*G_X)-1:0] l_um_ow;
 			wire [(U_IW*G_X)-1:0] l_um_iw;
@@ -272,11 +284,11 @@ module tt_top #(
 
 			// Spine connection
 			if (i & 1) begin
-				assign spine_top_ow = l_spine_ow;
-				assign l_spine_iw = spine_top_iw;
+				assign {spine_top_ow[S_OW-1], spine_top_sram_ow, spine_top_ow[S_OW-2:0]} = l_spine_ow;
+				assign l_spine_iw = {spine_top_iw[S_IW-1], sram_iw, spine_top_iw[S_IW-2:0]};
 			end else begin
-				assign spine_bot_ow = l_spine_ow;
-				assign l_spine_iw = spine_bot_iw;
+				assign {spine_bot_ow[S_OW-1], spine_bot_sram_ow, spine_bot_ow[S_OW-2:0]} = l_spine_ow;
+				assign l_spine_iw = {spine_bot_iw[S_IW-1], sram_iw, spine_bot_iw[S_IW-2:0]};
 			end
 
 			// Branch Mux
