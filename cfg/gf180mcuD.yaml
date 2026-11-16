@@ -3,13 +3,14 @@ pdk:
   tech: 'gf180mcuD'
   scale: 2000
   die:
-    width:  3932000
-    height: 5122000
+    # Match the hackclub-asic-pg openframe_project_wrapper DIEAREA.
+    width:  3166630
+    height: 4766630
     margin:
-      left:   450000
-      right:  450000
-      top:    450000
-      bottom: 450000
+      left:   85000
+      right:  85000
+      top:    85000
+      bottom: 85000
   site:
     width:  560
     height: 3920
