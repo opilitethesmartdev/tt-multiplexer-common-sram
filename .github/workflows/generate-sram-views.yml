@@ -14,12 +14,18 @@ jobs:
         with:
           enable-cache: true
 
+      - name: Install KLayout
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y klayout
+
       - name: Generate SRAM views
         working-directory: ol2/tt_top
+        env:
+          PDM_BUILD_SCM_VERSION: "0.0.0"
         run: |
-          uv sync --project arrakeen_sram
-          uv pip install --python arrakeen_sram/.venv/bin/python klayout
-          uv run --project arrakeen_sram arrakeen_sram/generate_views.py
+          uv sync --project arrakeen_sram --python-preference only-system
+          PYTHONPATH=/usr/lib/klayout/pymod uv run --project arrakeen_sram arrakeen_sram/generate_views.py
 
       - name: Upload SRAM views
         uses: actions/upload-artifact@v6
