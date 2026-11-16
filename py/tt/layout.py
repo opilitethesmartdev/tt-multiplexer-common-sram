@@ -133,8 +133,12 @@ class Layout:
 		sram_iw = sram.data_width if sram else 0
 
 		self.vspine = ConfigNode({
-			'ow': self.cfg.tt.uio.o + self.cfg.tt.uio.io * 2 + sram_ow + 2,
-			'iw': self.cfg.tt.uio.i + self.cfg.tt.uio.io + sram_iw + 9 + 1 + 2,
+			'ow': self.cfg.tt.uio.o + self.cfg.tt.uio.io * 2 + 2,
+			'iw': self.cfg.tt.uio.i + self.cfg.tt.uio.io + 9 + 1 + 2,
+		})
+		self.vspine_sram = ConfigNode({
+			'ow': self.vspine.ow + sram_ow,
+			'iw': self.vspine.iw + sram_iw,
 		})
 		self.user = ConfigNode({
 			'ow': self.cfg.tt.uio.o + self.cfg.tt.uio.io * 2 + sram_ow,
@@ -459,8 +463,8 @@ class Layout:
 		]
 
 		vspine_ply = [
-			('spine_ow', self.vspine.ow),	# { so_gh, so_usr, so_gl }
-			('spine_iw', self.vspine.iw),	# { si_gh, si_usr, si_sel, si_ena, si_gl }
+			('spine_ow', self.vspine_sram.ow),	# { so_gh, so_sram, so_usr, so_gl }
+			('spine_iw', self.vspine_sram.iw),	# { si_gh, si_sram, si_usr, si_sel, si_ena, si_gl }
 			('k_zero',   None),
 			('k_one',    None),
 			('addr',     4),
@@ -522,6 +526,7 @@ class Layout:
 			( 'ctrl_ena',       None, None ),
 			( 'ctrl_sel_inc',   None, None ),
 			( 'ctrl_sel_rst_n', None, None ),
+			( 'sram_side_sel',  None, None ),
 			( 'k_one',          None, None ),
 			( 'k_zero',         None, None ),
 			( 'i', 2, 8 ),
