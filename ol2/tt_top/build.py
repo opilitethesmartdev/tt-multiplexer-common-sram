@@ -259,8 +259,14 @@ if __name__ == '__main__':
 			"top_I.sram_hi_I VPWR VGND vdpwr vgnd",
 		],
 
-		"PDN_CONNECT_MACROS_TO_GRID"    : False,
-		"PDN_ENABLE_GLOBAL_CONNECTIONS" : False,
+		"PDN_CONNECT_MACROS_TO_GRID": True,
+		"PDN_MACRO_CONNECTIONS": [
+			"top_I.* vdpwr vgnd VDPWR VGND",
+			"top_I.* vapwr vgnd VAPWR VGND",
+			"top_I.* vdpwr vgnd VPWR VGND",
+			"top_I.* vdpwr vgnd VDD VSS",
+		],
+		"PDN_ENABLE_GLOBAL_CONNECTIONS": True,
 
 		"FP_PDN_CORE_RING"          : True,
 		"FP_PDN_CORE_RING_VWIDTH"   : 25,
