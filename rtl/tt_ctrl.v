@@ -63,6 +63,7 @@ module tt_ctrl #(
 	// Split spine connections
 	wire            so_gh      [0:1];
 	wire [N_SRAM_OW-1:0] so_sram [0:1];
+	wire [N_SRAM_OW-1:0] sram_ow_sel;
 	wire [N_IO-1:0] so_uio_oe  [0:1];
 	wire [N_IO-1:0] so_uio_out [0:1];
 	wire  [N_O-1:0] so_uo_out  [0:1];
@@ -169,8 +170,16 @@ module tt_ctrl #(
 	tt_prim_mux2 sram_ow_mux_I[N_SRAM_OW-1:0] (
 		.a (so_sram[0]),
 		.b (so_sram[1]),
-		.x (sram_ow),
+		.x (sram_ow_sel),
 		.s (side_sel)
+	);
+
+	// Keep the SRAM inactive when the controller is disabled.
+	tt_prim_mux2 sram_ow_idle_gate_I[N_SRAM_OW-1:0] (
+		.a ({N_SRAM_OW{k_zero}}),
+		.b (sram_ow_sel),
+		.x (sram_ow),
+		.s (ctrl_ena_ibuf)
 	);
 
 	// Output buffers
