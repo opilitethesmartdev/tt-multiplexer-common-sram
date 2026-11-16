@@ -46,12 +46,11 @@ def io_place(
 	for pn, pp in tti.layout.ply_mux_port.items():
 		tt_odb.place_pin(die_area, layer_we, bterm_map.pop(pn), pp, 'E')
 
-	# SRAM sideband bus: dedicated west-edge pins on Metal4.
+	# SRAM sideband bus: dedicated west-edge pins on the spine horizontal layer.
 	tti.layout.sramif_layout()
 	if tti.layout.ply_mux_sram:
-		layer_sram = reader.tech.findLayer("Metal4")
 		for pn, pp in tti.layout.ply_mux_sram.items():
-			tt_odb.place_pin(die_area, layer_sram, bterm_map.pop(pn), pp, 'W')
+			tt_odb.place_pin(die_area, layer_we, bterm_map.pop(pn), pp, 'W')
 
 if __name__ == "__main__":
 	io_place()

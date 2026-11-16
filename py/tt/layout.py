@@ -506,7 +506,7 @@ class Layout:
 				start  = self.glb.margin.x,
 				end    = self.glb.mux.width - self.glb.margin.x,
 				step   = 0,
-				layer  = 'Metal4',
+				layer  = self.cfg.tt.spine.hlayer,
 				axis   = 'y',
 			)
 			self.ply_mux_sram = self._ply_finalize(sram_ply_e, sram_tracks)
