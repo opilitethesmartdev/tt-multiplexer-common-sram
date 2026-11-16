@@ -503,8 +503,8 @@ class Layout:
 		if sram_ply_e:
 			sram_tracks = self._ply_distribute(
 				n_pins = len(sram_ply_e),
-				start  = 0,
-				end    = self.glb.mux.height,
+				start  = self.glb.margin.x,
+				end    = self.glb.mux.width - self.glb.margin.x,
 				step   = 0,
 				layer  = 'Metal4',
 				axis   = 'y',
