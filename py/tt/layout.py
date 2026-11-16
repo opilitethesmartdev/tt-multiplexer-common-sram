@@ -503,8 +503,8 @@ class Layout:
 		if sram_ply_e:
 			sram_tracks = self._ply_distribute(
 				n_pins = len(sram_ply_e),
-				start  = self.glb.margin.x,
-				end    = self.glb.mux.width - self.glb.margin.x,
+				start  = self.glb.margin.y,
+				end    = self.glb.mux.height - self.glb.margin.y,
 				step   = 0,
 				layer  = self.cfg.tt.spine.hlayer,
 				axis   = 'y',
