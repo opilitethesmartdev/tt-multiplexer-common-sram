@@ -27,7 +27,7 @@ module tt_user_module #(
 
 	// auto-set
 	parameter integer N_OW = N_O + N_IO * 2 + `TT_SRAM_OW,
-	parameter integer N_IW = N_I + N_IO + `TT_SRAM_IW + N_IO
+	parameter integer N_IW = N_I + N_IO + `TT_SRAM_IW
 )(
 `ifdef USE_POWER_PINS
 	input  wire VDPWR,
