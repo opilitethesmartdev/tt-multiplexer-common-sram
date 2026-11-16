@@ -16,8 +16,10 @@ module tt_ctrl #(
 	parameter integer N_I  = `TT_N_I,
 
 	// auto-set
-	parameter integer S_OW = N_O + N_IO * 2 + 2,
-	parameter integer S_IW = N_I + N_IO + 9 + 1 + 2
+	parameter integer N_SRAM_OW = `TT_SRAM_OW,
+	parameter integer N_SRAM_IW = `TT_SRAM_IW,
+	parameter integer S_OW = N_O + N_IO * 2 + N_SRAM_OW + 2,
+	parameter integer S_IW = N_I + N_IO + N_SRAM_IW + 9 + 1 + 2
 )(
 	// Power
 `ifdef USE_POWER_PINS
@@ -41,6 +43,10 @@ module tt_ctrl #(
 	input  wire  [S_OW-1:0] spine_bot_ow,
 	output wire  [S_IW-1:0] spine_bot_iw,
 
+	// Common SRAM interface
+	output wire [N_SRAM_OW-1:0] sram_ow,
+	input  wire [N_SRAM_IW-1:0] sram_iw,
+
 	// Control interface
 	input  wire ctrl_sel_rst_n,
 	input  wire ctrl_sel_inc,
@@ -56,12 +62,14 @@ module tt_ctrl #(
 
 	// Split spine connections
 	wire            so_gh      [0:1];
+	wire [N_SRAM_OW-1:0] so_sram [0:1];
 	wire [N_IO-1:0] so_uio_oe  [0:1];
 	wire [N_IO-1:0] so_uio_out [0:1];
 	wire  [N_O-1:0] so_uo_out  [0:1];
 	wire            so_gl      [0:1];
 
 	wire            si_gh     [0:1];
+	wire [N_SRAM_IW-1:0] si_sram [0:1];
 	wire [N_IO-1:0] si_uio_in [0:1];
 	wire  [N_I-1:0] si_ui_in  [0:1];
 	wire      [8:0] si_sel    [0:1];
@@ -96,8 +104,8 @@ module tt_ctrl #(
 	wire   [N_O-1:0] mux_uo_out_n;
 
 	// Mapping
-	assign { so_gh[1], so_uio_oe[1], so_uio_out[1], so_uo_out[1], so_gl[1] } = spine_top_ow;
-	assign { so_gh[0], so_uio_oe[0], so_uio_out[0], so_uo_out[0], so_gl[0] } = spine_bot_ow;
+	assign { so_gh[1], so_sram[1], so_uio_oe[1], so_uio_out[1], so_uo_out[1], so_gl[1] } = spine_top_ow;
+	assign { so_gh[0], so_sram[0], so_uio_oe[0], so_uio_out[0], so_uo_out[0], so_gl[0] } = spine_bot_ow;
 
 	// Protection diodes
 	tt_prim_diode spine_diode_I[2*S_OW-1:0] (
@@ -157,6 +165,14 @@ module tt_ctrl #(
 		.s (side_sel)
 	);
 
+	// Select the SRAM command bus from the active side.
+	tt_prim_mux2 sram_ow_mux_I[N_SRAM_OW-1:0] (
+		.a (so_sram[0]),
+		.b (so_sram[1]),
+		.x (sram_ow),
+		.s (side_sel)
+	);
+
 	// Output buffers
 	tt_prim_inv #(
 		.HIGH_DRIVE(1)
@@ -207,7 +223,7 @@ module tt_ctrl #(
 			) tbuf_spine_ow_I[S_OW-3:0] (
 				.a  (tie_zero),
 				.tx (tx),
-				.z  ({so_uio_oe[i], so_uio_out[i], so_uo_out[i]})
+				.z  ({so_sram[i], so_uio_oe[i], so_uio_out[i], so_uo_out[i]})
 			);
 
 		end
@@ -227,8 +243,8 @@ module tt_ctrl #(
 	);
 
 	// Spine split
-	assign spine_top_iw = { si_gh[1], si_uio_in[1], si_ui_in[1], si_sel[1], si_ena[1], si_gl[1] };
-	assign spine_bot_iw = { si_gh[0], si_uio_in[0], si_ui_in[0], si_sel[0], si_ena[0], si_gl[0] };
+	assign spine_top_iw = { si_gh[1], si_sram[1], si_uio_in[1], si_ui_in[1], si_sel[1], si_ena[1], si_gl[1] };
+	assign spine_bot_iw = { si_gh[0], si_sram[0], si_uio_in[0], si_ui_in[0], si_sel[0], si_ena[0], si_gl[0] };
 
 	// Generate for top/bottom spine
 	// We already mask at this level to avoid unneeded toggling
@@ -257,6 +273,14 @@ module tt_ctrl #(
 				.a (pad_ui_in),
 				.e (side_ena[i]),
 				.z (si_ui_in[i])
+			);
+
+			tt_prim_zbuf #(
+				.HIGH_DRIVE(1)
+			) sram_rdata_buf_I[N_SRAM_IW-1:0] (
+				.a (sram_iw),
+				.e (side_ena[i]),
+				.z (si_sram[i])
 			);
 
 			tt_prim_buf #(

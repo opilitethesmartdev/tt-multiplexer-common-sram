@@ -39,11 +39,14 @@ module tt_top #(
 	output wire k_one
 );
 
-	localparam integer S_OW = N_O + N_IO * 2 + 2;
-	localparam integer S_IW = N_I + N_IO + 9 + 1 + 2;
+	localparam integer N_SRAM_OW = `TT_SRAM_OW;
+	localparam integer N_SRAM_IW = `TT_SRAM_IW;
 
-	localparam integer U_OW = N_O + N_IO * 2;
-	localparam integer U_IW = N_I + N_IO;
+	localparam integer S_OW = N_O + N_IO * 2 + N_SRAM_OW + 2;
+	localparam integer S_IW = N_I + N_IO + N_SRAM_IW + 9 + 1 + 2;
+
+	localparam integer U_OW = N_O + N_IO * 2 + N_SRAM_OW;
+	localparam integer U_IW = N_I + N_IO + N_SRAM_IW;
 
 
 	// Signals
@@ -77,6 +80,17 @@ module tt_top #(
 
 	wire  [S_OW-1:0] spine_bot_ow;
 	wire  [S_IW-1:0] spine_bot_iw;
+
+	// Common SRAM interface
+	wire [N_SRAM_OW-1:0] sram_ow;
+	wire [N_SRAM_IW-1:0] sram_iw;
+	wire sram_cs;
+	wire sram_we;
+	wire [`TT_SRAM_WMASK-1:0] sram_wmask;
+	wire [`TT_SRAM_ADDR-1:0] sram_addr;
+	wire [`TT_SRAM_DATA-1:0] sram_wdata;
+	wire [`TT_SRAM_WMASK-1:0] sram_we_masked;
+	wire [`TT_SRAM_DATA-1:0] sram_q;
 
 	// Control signals
 	wire ctrl_sel_rst_n;
@@ -180,6 +194,8 @@ module tt_top #(
 		.spine_top_iw   (spine_top_iw),
 		.spine_bot_ow   (spine_bot_ow),
 		.spine_bot_iw   (spine_bot_iw),
+		.sram_ow        (sram_ow),
+		.sram_iw        (sram_iw),
 		.ctrl_sel_rst_n (ctrl_sel_rst_n),
 		.ctrl_sel_inc   (ctrl_sel_inc),
 		.ctrl_ena       (ctrl_ena),
@@ -187,6 +203,21 @@ module tt_top #(
 		.k_zero         (k_zero)
 	);
 
+
+	// Common Arrakeen SRAM
+	// --------------------
+
+	assign {sram_cs, sram_we, sram_wmask, sram_addr, sram_wdata} = sram_ow;
+	assign sram_we_masked = {`TT_SRAM_WMASK{sram_cs & sram_we}} & sram_wmask;
+	assign sram_iw = sram_cs ? sram_q : {`TT_SRAM_DATA{1'b0}};
+
+	SP6TSRAM512x32 sram_I (
+		.a   (sram_addr),
+		.d   (sram_wdata),
+		.we  (sram_we_masked),
+		.clk (pad_ui_in[0]),
+		.q   (sram_q)
+	);
 
 	// Branches
 	// --------

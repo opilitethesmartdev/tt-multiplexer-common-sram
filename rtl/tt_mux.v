@@ -17,11 +17,14 @@ module tt_mux #(
 	parameter integer N_I  = `TT_N_I,
 
 	// auto-set
-	parameter integer S_OW = N_O + N_IO * 2 + 2,
-	parameter integer S_IW = N_I + N_IO + 9 + 1 + 2,
+	parameter integer N_SRAM_OW = `TT_SRAM_OW,
+	parameter integer N_SRAM_IW = `TT_SRAM_IW,
 
-	parameter integer U_OW = N_O + N_IO * 2,
-	parameter integer U_IW = N_I + N_IO
+	parameter integer S_OW = N_O + N_IO * 2 + N_SRAM_OW + 2,
+	parameter integer S_IW = N_I + N_IO + N_SRAM_IW + 9 + 1 + 2,
+
+	parameter integer U_OW = N_O + N_IO * 2 + N_SRAM_OW,
+	parameter integer U_IW = N_I + N_IO + N_SRAM_IW
 )(
 	// Power
 `ifdef USE_POWER_PINS
