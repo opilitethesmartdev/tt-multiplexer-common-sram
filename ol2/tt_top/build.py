@@ -63,6 +63,26 @@ class CustomRoute(OdbpyStep):
 		)
 
 
+@Step.factory.register()
+class OptionalManualMacroPlacement(Odb.ManualMacroPlacement):
+	"""Place all macros present in the synthesized design.
+
+	TinyTapeout's geometric layout can include optional power-gate instances
+	that synthesis removes when the corresponding user block is not powered.
+	Those absent instances have nothing to place, so skip them while still
+	placing every macro instance that survives synthesis.
+	"""
+
+	id = "TT.Top.OptionalManualMacroPlacement"
+	name = "Manual Macro Placement (skip absent optional instances)"
+
+	def get_script_path(self):
+		return os.path.join(
+			os.path.dirname(__file__),
+			"odb_manual_macro_placement.py"
+		)
+
+
 class TopFlow(SequentialFlow):
 
 	Steps: List[Type[Step]] = [
@@ -72,7 +92,8 @@ class TopFlow(SequentialFlow):
 		Checker.YosysSynthChecks,
 		OpenROAD.Floorplan,
 		Odb.ApplyDEFTemplate,
-		Odb.ManualMacroPlacement,
+		Odb.CustomIOPlacement,
+		OptionalManualMacroPlacement,
 		CustomPower,
 		OpenROAD.GeneratePDN,
 		OpenROAD.GlobalPlacement,
@@ -207,15 +228,40 @@ if __name__ == '__main__':
 			for m in user_modules
 	]))
 
+	design_name = os.getenv('DESIGN_NAME') or (
+		'tt_gf_wrapper' if tti.cfg.pdk.name == 'gf180mcuD' else 'openframe_project_wrapper'
+	)
+
+	# The shared wrapper DEF is authored for SKY130. For GF180, retain its
+	# special power/ground pin locations, but translate the design and
+	# technology identifiers. The pin layer names were already translated to
+	# GF180 (Metal2/Metal3) when the template was first imported; signal-pin
+	# mismatches are handled permissively below and the 74 raw pads are placed
+	# by Odb.CustomIOPlacement.
+	def_template = 'openframe_project_wrapper.def'
+	if tti.cfg.pdk.name == 'gf180mcuD':
+		def_template = 'tt_gf_wrapper.def'
+		def_text = pathlib.Path('openframe_project_wrapper.def').read_text()
+		def_replacements = (
+			('DESIGN openframe_project_wrapper ;', 'DESIGN tt_gf_wrapper ;'),
+			('TECHNOLOGY sky130A ;', 'TECHNOLOGY gf180mcuD ;'),
+		)
+		for old, new in def_replacements:
+			if old not in def_text:
+				raise RuntimeError(f'Expected GF180 DEF template token not found: {old}')
+			def_text = def_text.replace(old, new)
+		pathlib.Path(def_template).write_text(def_text)
+
 	# Custom config
 	flow_cfg = {
 		# Main design properties
-		"DESIGN_NAME"    : "openframe_project_wrapper",
+		"DESIGN_NAME"    : design_name,
 		"DESIGN_IS_CORE" : False,
 
 		# Sources
+		"VERILOG_INCLUDE_DIRS" : [ "dir::../../rtl/" ],
 		"VERILOG_FILES": [
-			"dir::openframe_project_wrapper.v",
+			f"dir::{design_name}.v",
 			"dir::../../rtl/tt_top.v",
 			"dir::../../rtl/tt_gpio.v",
 			"dir::../../rtl/tt_user_module.v",
@@ -246,8 +292,6 @@ if __name__ == '__main__':
 		"DIE_AREA"  : [  0.00,  0.00, 3166.63, 4766.63 ],
 		"CORE_AREA" : [ 85.00, 85.00, 3081.63, 4681.63 ],
 		"FP_SIZING" : "absolute",
-		"FP_DEF_TEMPLATE" : "dir::openframe_project_wrapper.def",
-		"FP_TEMPLATE_COPY_POWER_PINS" : True,
 
 		# PDN
 		"VDD_NETS": [ "vdpwr", "vapwr" ],
@@ -291,6 +335,25 @@ if __name__ == '__main__':
 		"MAGIC_EXT_SHORT_RESISTOR" : True, # Fixes LVS failures when more than two pins are connected to the same net
 		"IGNORE_DISCONNECTED_MODULES": disc_modules,
 	}
+
+	# GF180 exposes the 74 raw pad terminals directly. The SKY130 OpenFrame
+	# DEF template has a different GPIO interface, so place GF180 pins by
+	# their physical pad order instead.
+	if tti.cfg.pdk.name == "gf180mcuD":
+		flow_cfg.update({
+			"FP_DEF_TEMPLATE": "dir::tt_gf_wrapper.def",
+			"FP_TEMPLATE_MATCH_MODE": "permissive",
+			"FP_TEMPLATE_COPY_POWER_PINS": True,
+			"IO_PIN_ORDER_CFG": "dir::gf180_pin_order.cfg",
+			"IO_PIN_H_LAYER": "Metal3",
+			"IO_PIN_V_LAYER": "Metal2",
+			"ERRORS_ON_UNMATCHED_IO": "both",
+		})
+	else:
+		flow_cfg.update({
+			"FP_DEF_TEMPLATE": "dir::openframe_project_wrapper.def",
+			"FP_TEMPLATE_COPY_POWER_PINS": True,
+		})
 
 	# Update PDN config
 	pdn_width   =  8.75
