@@ -16,11 +16,11 @@ pya: Any
 print("Generating block")
 
 prefix = "SP6T"
-cell_name = "SRAM512x32"
+cell_name = "SRAM256x32"
 
 lib = gf180mcu.Library(name=f"{prefix}{cell_name}")
 memfab = gf180mcu.SPSRAMFactory(lib=lib, name_prefix=prefix)
-mem_cell = memfab.block(words=512, word_size=32, we_size=4, cell_name=cell_name)
+mem_cell = memfab.block(words=256, word_size=32, we_size=4, cell_name=cell_name)
 
 # Be sure layout has been generated
 mem_cell.layout
