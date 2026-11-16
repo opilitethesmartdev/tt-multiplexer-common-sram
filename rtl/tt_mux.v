@@ -83,7 +83,6 @@ module tt_mux #(
 
 	// User module connections as arrays
 	wire [U_OW-1:0] um_owa[0:N_UM-1];
-	wire [U_IW-1:0] um_iwa[0:N_UM-1];
 	wire [U_OW_STD-1:0] um_owa_std[0:N_UM-1];
 	wire [N_SRAM_OW-1:0] um_owa_sram[0:N_UM-1];
 	wire [U_IW_STD-1:0] um_iwa_std[0:N_UM-1];
@@ -173,6 +172,14 @@ module tt_mux #(
 		.a  (tie_zero),
 		.tx (branch_sel_n_tbe),
 		.z  (bus_ow)
+	);
+
+	tt_prim_tbuf #(
+		.HIGH_DRIVE(0)
+	) bus_pull_sram_ow_I[N_SRAM_OW-1:0] (
+		.a  (tie_zero),
+		.tx (branch_sel_n_tbe),
+		.z  (sram_ow)
 	);
 
 	// Spine drive TBUF for Outward

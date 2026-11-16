@@ -491,8 +491,9 @@ class Layout:
 		self.ply_mux_bus  = self._ply_finalize(hspine_ply_e, tracks)
 		self.ply_mux_port = self._ply_finalize(vspine_ply_e, tracks)
 
-		# Shared SRAM sideband pins use a separate Metal4 pin bank on the
-		# opposite edge of the mux macro, keeping them off the narrow spine.
+
+	def sramif_layout(self):
+		# Place the shared SRAM sideband pins separately from the spine pins.
 		sram_ply = [
 			('sram_ow', self.user.ow - self.user_std.ow),
 			('sram_iw', self.user.iw - self.user_std.iw),
