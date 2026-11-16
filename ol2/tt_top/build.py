@@ -255,8 +255,8 @@ if __name__ == '__main__':
 
 		"PDN_CFG": "dir::pdn.tcl",
 		"PDN_MACRO_CONNECTIONS": [
-			"top_I.sram_lo_I VPWR VGND vapwr vgnd",
-			"top_I.sram_hi_I VPWR VGND vapwr vgnd",
+			"top_I.sram_lo_I VPWR VGND vdpwr vgnd",
+			"top_I.sram_hi_I VPWR VGND vdpwr vgnd",
 		],
 
 		"PDN_CONNECT_MACROS_TO_GRID"    : False,
