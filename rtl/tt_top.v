@@ -100,6 +100,9 @@ module tt_top #(
 	wire [`TT_SRAM_DATA-1:0] sram_q_hi;
 	reg sram_bank_d;
 	reg sram_cs_d;
+	reg [`TT_SRAM_WMASK-1:0] sram_we_lo_d;
+	reg [`TT_SRAM_WMASK-1:0] sram_we_hi_d;
+	reg [`TT_SRAM_DATA-1:0] sram_wdata_d;
 
 	// Control signals
 	wire ctrl_sel_rst_n;
@@ -229,9 +232,15 @@ module tt_top #(
 		if (!pad_ui_in[1]) begin
 			sram_bank_d <= 1'b0;
 			sram_cs_d <= 1'b0;
+			sram_we_lo_d <= {`TT_SRAM_WMASK{1'b0}};
+			sram_we_hi_d <= {`TT_SRAM_WMASK{1'b0}};
+			sram_wdata_d <= {`TT_SRAM_DATA{1'b0}};
 		end else begin
 			sram_bank_d <= sram_addr[8];
 			sram_cs_d <= sram_cs;
+			sram_we_lo_d <= sram_we_lo;
+			sram_we_hi_d <= sram_we_hi;
+			sram_wdata_d <= sram_wdata;
 		end
 	end
 
@@ -241,16 +250,16 @@ module tt_top #(
 
 	SP6TSRAM256x32 sram_lo_I (
 		.a   (sram_addr[7:0]),
-		.d   (sram_wdata),
-		.we  (sram_we_lo),
+		.d   (sram_wdata_d),
+		.we  (sram_we_lo_d),
 		.clk (pad_ui_in[0]),
 		.q   (sram_q_lo)
 	);
 
 	SP6TSRAM256x32 sram_hi_I (
 		.a   (sram_addr[7:0]),
-		.d   (sram_wdata),
-		.we  (sram_we_hi),
+		.d   (sram_wdata_d),
+		.we  (sram_we_hi_d),
 		.clk (pad_ui_in[0]),
 		.q   (sram_q_hi)
 	);
