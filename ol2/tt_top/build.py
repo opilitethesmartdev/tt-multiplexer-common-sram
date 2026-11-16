@@ -165,6 +165,7 @@ if __name__ == '__main__':
 	# Generate macros
 	macros = { }
 	user_modules = []
+	sram_user_modules = set()
 	disc_modules = []
 
 	for m in tti.die.get_sub_macros():
@@ -176,6 +177,8 @@ if __name__ == '__main__':
 			}
 			if m.mod_name.startswith('tt_um_'):
 				user_modules.append(m.mod_name)
+				if getattr(m.elem, 'uses_sram', False):
+					sram_user_modules.add(m.mod_name)
 			else:
 				md = {
 					'nl': f'dir::verilog/{m.mod_name:s}.v',
@@ -195,10 +198,12 @@ if __name__ == '__main__':
 			"orientation": m.orient,
 		}
 
-	# Generate dummy for all user modules
+	# Generate logical stubs for user macros. SRAM-capable modules have
+	# the additional shared-memory pins in their Verilog interface.
 	mod_tpl = open('tt_um_tpl.v', 'r').read()
+	mod_tpl_sram = open('tt_um_sram_tpl.v', 'r').read()
 	open('verilog/tt_um_all.v', 'w').write('\n'.join([
-		mod_tpl.format(mod_name=m)
+		(mod_tpl_sram if m in sram_user_modules else mod_tpl).format(mod_name=m)
 			for m in user_modules
 	]))
 
@@ -249,6 +254,9 @@ if __name__ == '__main__':
 		"GND_NETS": [ "vgnd",  "vgnd"  ],
 
 		"PDN_CFG": "dir::pdn.tcl",
+		"PDN_MACRO_CONNECTIONS": [
+			"top_I.sram_I VPWR VGND vapwr vgnd",
+		],
 
 		"PDN_CONNECT_MACROS_TO_GRID"    : False,
 		"PDN_ENABLE_GLOBAL_CONNECTIONS" : False,

@@ -278,7 +278,7 @@ class CommonSram(LayoutElement):
 	color = 'goldenrod'
 
 	def __init__(self, layout):
-		lef_path = Path('lef') / f'{self.mod_name}.lef'
+		lef_path = Path(__file__).resolve().parents[2] / 'ol2' / 'tt_top' / 'lef' / f'{self.mod_name}.lef'
 		if not lef_path.is_file():
 			raise RuntimeError(f"Missing generated SRAM LEF: {lef_path}")
 
