@@ -31,7 +31,14 @@ class ModuleSlot:
 		self.analog = cfg_data.get('analog', {})
 
 		if self.pg_vdd is True:
-			self.pg_vdd = 'hp' if self.width > 4 else 'll'
+			# Select only a variant that the active PDK actually provides.
+			variants = self.placer.cfg.pdk.pwrgate.vdd.variants
+			if self.width > 4 and 'hp' in variants:
+				self.pg_vdd = 'hp'
+			elif 'll' in variants:
+				self.pg_vdd = 'll'
+			else:
+				self.pg_vdd = variants[0]
 
 		if ((self.pos_x is None) and (self.pos_y is None) and
 		        ('mux_id' in cfg_data) and ('blk_id' in cfg_data)):
