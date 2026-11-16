@@ -252,10 +252,11 @@ if __name__ == '__main__':
 
 		"PDN_CONNECT_MACROS_TO_GRID": True,
 		"PDN_MACRO_CONNECTIONS": [
-			"top_I.* vdpwr vgnd VDPWR VGND",
-			"top_I.* vapwr vgnd VAPWR VGND",
-			"top_I.* vdpwr vgnd VPWR VGND",
-			"top_I.* vdpwr vgnd VDD VSS",
+			"top_I.*mux_I vdpwr vgnd VDPWR VGND",
+			"top_I.ctrl_I vdpwr vgnd VDPWR VGND",
+			"top_I.*tt_pg_vdd_I vdpwr vgnd VPWR VGND",
+			"top_I.*tt_asw_.* vdpwr vgnd VDPWR VGND",
+			"top_I.*tt_asw_.* vapwr vgnd VAPWR VGND",
 		],
 		"PDN_ENABLE_GLOBAL_CONNECTIONS": True,
 
