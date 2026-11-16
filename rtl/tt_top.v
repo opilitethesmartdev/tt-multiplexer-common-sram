@@ -217,9 +217,14 @@ module tt_top #(
 
 	// The Arrakeen compiler's 256x32 macro is banked twice to provide
 	// a logical 512x32 SRAM. Delay the bank select with the synchronous data.
-	always @(posedge pad_ui_in[0]) begin
-		sram_bank_d <= sram_addr[8];
-		sram_cs_d <= sram_cs;
+	always @(posedge pad_ui_in[0] or negedge pad_ui_in[1]) begin
+		if (!pad_ui_in[1]) begin
+			sram_bank_d <= 1'b0;
+			sram_cs_d <= 1'b0;
+		end else begin
+			sram_bank_d <= sram_addr[8];
+			sram_cs_d <= sram_cs;
+		end
 	end
 
 	assign sram_iw = sram_cs_d
