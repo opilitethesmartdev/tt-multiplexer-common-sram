@@ -13,6 +13,11 @@ from decimal import Decimal
 from reader import click_odb, click
 
 
+@click.group
+def cli():
+    pass
+
+
 LEF2OA_MAP = {
     "N": "R0",
     "S": "R180",
@@ -97,5 +102,8 @@ def manual_macro_placement(reader, config, fixed):
     print(f"Successfully placed {placed} macro instances; skipped {len(missing)} absent instances.")
 
 
+cli.add_command(manual_macro_placement)
+
+
 if __name__ == "__main__":
-    manual_macro_placement()
+    cli()

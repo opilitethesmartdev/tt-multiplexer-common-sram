@@ -238,9 +238,9 @@ if __name__ == '__main__':
 		def_replacements = (
 			('DESIGN openframe_project_wrapper ;', 'DESIGN tt_gf_wrapper ;'),
 			('TECHNOLOGY sky130A ;', 'TECHNOLOGY gf180mcuD ;'),
-			# SKY130's template uses 1000 DEF units/µm; GF180 uses 2000.
-			# Keep the physical die and inherited power-pin coordinates unchanged.
-			('UNITS DISTANCE MICRONS 1000 ;', 'UNITS DISTANCE MICRONS 2000 ;'),
+			# Keep the DEF's native 1000 units/µm declaration. Its die and pin
+			# coordinates are already expressed in those units; OpenDB converts
+			# them to the GF180 technology database units when reading the DEF.
 			('LAYER met2 ', 'LAYER Metal2 '),
 			('LAYER met3 ', 'LAYER Metal3 '),
 		)
@@ -250,8 +250,6 @@ if __name__ == '__main__':
 			def_text = def_text.replace(old, new)
 		if 'LAYER met2 ' in def_text or 'LAYER met3 ' in def_text:
 			raise RuntimeError('GF180 DEF template still contains SKY130 routing layer names')
-		if 'UNITS DISTANCE MICRONS 1000 ;' in def_text:
-			raise RuntimeError('GF180 DEF template still uses SKY130 DBU scaling')
 		pathlib.Path(def_template).write_text(def_text)
 
 	# Custom config
