@@ -274,7 +274,7 @@ class AnalogSwitch(LayoutElement):
 
 class CommonSram(LayoutElement):
 
-	mod_name = 'SP6TSRAM512x32'
+	mod_name = 'SP6TSRAM256x32'
 	color = 'goldenrod'
 
 	def __init__(self, layout):
@@ -468,19 +468,29 @@ class Branch(LayoutElement):
 
 			# The common SRAM occupies this reserved 4x4 slot.
 			if mp.common_sram:
-				sram = CommonSram(layout)
-				if sram.width > block.width or sram.height > block.height:
+				sram_lo = CommonSram(layout)
+				sram_hi = CommonSram(layout)
+				gap = layout.glb.margin.y
+				total_height = sram_lo.height + sram_hi.height + gap
+				if sram_lo.width > block.width or total_height > block.height:
 					raise RuntimeError(
-						f"Arrakeen SRAM ({sram.width}x{sram.height}) does not fit "
-						f"reserved slot ({block.width}x{block.height})"
+						f"Two Arrakeen 256x32 banks ({sram_lo.width}x{sram_lo.height} each) "
+						f"do not fit reserved slot ({block.width}x{block.height})"
 					)
-				pos_x = blk_x + (block.width - sram.width) // 2
-				pos_y = blk_y + (block.height - sram.height) // 2
+				pos_x = blk_x + (block.width - sram_lo.width) // 2
+				pos_y = blk_y + (block.height - total_height) // 2
+				orient = 'N' if (blk_id & 1) else 'FS'
 				self.add_child(
-					sram,
+					sram_lo,
 					Point(pos_x, pos_y),
-					'N' if (blk_id & 1) else 'FS',
-					name=name_pfx+'sram_I'
+					orient,
+					name=name_pfx+'sram_lo_I'
+				)
+				self.add_child(
+					sram_hi,
+					Point(pos_x, pos_y + sram_lo.height + gap),
+					orient,
+					name=name_pfx+'sram_hi_I'
 				)
 				continue
 
@@ -678,7 +688,12 @@ class Top(LayoutElement):
 		# The SRAM is a direct instance in tt_top.v; keep its physical
 		# position from the reserved slot but use the RTL instance name.
 		return [
-			m._replace(inst_name='sram_I') if m.mod_name == 'SP6TSRAM512x32' else m
+			m._replace(inst_name='sram_lo_I') if (
+				m.mod_name == 'SP6TSRAM256x32' and m.inst_name.endswith('sram_lo_I')
+			) else
+			m._replace(inst_name='sram_hi_I') if (
+				m.mod_name == 'SP6TSRAM256x32' and m.inst_name.endswith('sram_hi_I')
+			) else m
 			for m in macros
 		]
 

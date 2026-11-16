@@ -89,8 +89,12 @@ module tt_top #(
 	wire [`TT_SRAM_WMASK-1:0] sram_wmask;
 	wire [`TT_SRAM_ADDR-1:0] sram_addr;
 	wire [`TT_SRAM_DATA-1:0] sram_wdata;
-	wire [`TT_SRAM_WMASK-1:0] sram_we_masked;
-	wire [`TT_SRAM_DATA-1:0] sram_q;
+	wire [`TT_SRAM_WMASK-1:0] sram_we_lo;
+	wire [`TT_SRAM_WMASK-1:0] sram_we_hi;
+	wire [`TT_SRAM_DATA-1:0] sram_q_lo;
+	wire [`TT_SRAM_DATA-1:0] sram_q_hi;
+	reg sram_bank_d;
+	reg sram_cs_d;
 
 	// Control signals
 	wire ctrl_sel_rst_n;
@@ -208,15 +212,34 @@ module tt_top #(
 	// --------------------
 
 	assign {sram_cs, sram_we, sram_wmask, sram_addr, sram_wdata} = sram_ow;
-	assign sram_we_masked = {`TT_SRAM_WMASK{sram_cs & sram_we}} & sram_wmask;
-	assign sram_iw = sram_cs ? sram_q : {`TT_SRAM_DATA{1'b0}};
+	assign sram_we_lo = {`TT_SRAM_WMASK{sram_cs & sram_we & ~sram_addr[8]}} & sram_wmask;
+	assign sram_we_hi = {`TT_SRAM_WMASK{sram_cs & sram_we &  sram_addr[8]}} & sram_wmask;
 
-	SP6TSRAM512x32 sram_I (
-		.a   (sram_addr),
+	// The Arrakeen compiler's 256x32 macro is banked twice to provide
+	// a logical 512x32 SRAM. Delay the bank select with the synchronous data.
+	always @(posedge pad_ui_in[0]) begin
+		sram_bank_d <= sram_addr[8];
+		sram_cs_d <= sram_cs;
+	end
+
+	assign sram_iw = sram_cs_d
+		? (sram_bank_d ? sram_q_hi : sram_q_lo)
+		: {`TT_SRAM_DATA{1'b0}};
+
+	SP6TSRAM256x32 sram_lo_I (
+		.a   (sram_addr[7:0]),
 		.d   (sram_wdata),
-		.we  (sram_we_masked),
+		.we  (sram_we_lo),
 		.clk (pad_ui_in[0]),
-		.q   (sram_q)
+		.q   (sram_q_lo)
+	);
+
+	SP6TSRAM256x32 sram_hi_I (
+		.a   (sram_addr[7:0]),
+		.d   (sram_wdata),
+		.we  (sram_we_hi),
+		.clk (pad_ui_in[0]),
+		.q   (sram_q_hi)
 	);
 
 	// Branches
