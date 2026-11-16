@@ -272,7 +272,6 @@ if __name__ == '__main__':
 		# Routing
 		"GRT_ALLOW_CONGESTION"  : True,
 		"GRT_REPAIR_ANTENNAS"   : False,
-		"GRT_LAYER_ADJUSTMENTS" : [1, 0.95, 0.95, 0, 0, 0],
 		"DRT_ANTENNA_REPAIR_ITERS" : 0,
 		"RT_MAX_LAYER"          : "Metal4",
 
