@@ -182,9 +182,9 @@ tt:
       width: 142800
       height: 142800
       x:
-        offset: 26000
+        offset: 28800
       y:
-        offset: 26000
+        offset: 28800
     gf180mcu_ws_ip__shuttle_id:
       width: 195500
       height: 59500
