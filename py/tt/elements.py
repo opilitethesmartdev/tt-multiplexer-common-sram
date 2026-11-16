@@ -283,7 +283,7 @@ class CommonSram(LayoutElement):
 			raise RuntimeError(f"Missing generated SRAM LEF: {lef_path}")
 
 		lef = lef_path.read_text()
-		match = re.search(r'\\bSIZE\\s+([0-9]+(?:\\.[0-9]+)?)\\s+BY\\s+([0-9]+(?:\\.[0-9]+)?)\\s*;', lef, re.IGNORECASE)
+		match = re.search(r'\bSIZE\s+([0-9]+(?:\.[0-9]+)?)\s+BY\s+([0-9]+(?:\.[0-9]+)?)\s*;', lef, re.IGNORECASE)
 		if match is None:
 			raise RuntimeError(f"Could not read macro dimensions from {lef_path}")
 
