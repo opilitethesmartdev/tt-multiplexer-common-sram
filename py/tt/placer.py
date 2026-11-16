@@ -29,6 +29,8 @@ class ModuleSlot:
 		self.pg_vdd = cfg_data.get('pg_vdd', True)
 		self.pg_vaa = cfg_data.get('pg_vaa', False)
 		self.analog = cfg_data.get('analog', {})
+		self.uses_sram = cfg_data.get('uses_sram', False)
+		self.common_sram = cfg_data.get('common_sram', False)
 
 		if self.pg_vdd is True:
 			# Select only a variant that the active PDK actually provides.
@@ -56,6 +58,8 @@ class ModuleSlot:
 			'pg_vdd': self.pg_vdd,
 			'pg_vaa': self.pg_vaa,
 			'analog': self.analog,
+			'uses_sram': self.uses_sram,
+			'common_sram': self.common_sram,
 		}
 
 	@property
