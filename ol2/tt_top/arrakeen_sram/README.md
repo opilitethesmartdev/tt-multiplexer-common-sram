@@ -17,3 +17,13 @@ uv run --project arrakeen_sram arrakeen_sram/generate_views.py
 ```
 
 The generated GDS, LEF, and Verilog views are written to the parent `gds/`, `lef/`, and `verilog/` directories.
+
+## Interface timing
+
+The shared interface is synchronous to `pad_ui_in[0]`:
+
+- `sram_cs`, `sram_we`, `sram_wmask`, `sram_addr`, and `sram_wdata` are sampled on the rising edge
+- Read data is returned one cycle later on `sram_rdata`
+- The Arrakeen macro has a registered address input, so the wrapper delays write enables and write data by one cycle; a write request is committed on the following edge
+- The wrapper captures the bank select with the read request, so the returned data comes from the correct 256-word bank
+- Keep the requesting module selected until its read response is consumed
