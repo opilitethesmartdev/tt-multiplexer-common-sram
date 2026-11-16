@@ -274,8 +274,9 @@ module tt_top #(
 		if (~MUX_MASK[i])
 		begin : check_mask
 			// Signals
-			wire [S_OW+N_SRAM_OW-1:0] l_spine_ow;
-			wire [S_IW+N_SRAM_IW-1:0] l_spine_iw;
+			wire [S_OW-1:0] l_spine_ow;
+			wire [S_IW-1:0] l_spine_iw;
+			wire [N_SRAM_OW-1:0] l_sram_ow;
 
 			wire [(U_OW*G_X)-1:0] l_um_ow;
 			wire [(U_IW*G_X)-1:0] l_um_iw;
@@ -289,11 +290,13 @@ module tt_top #(
 
 			// Spine connection
 			if (i & 1) begin
-				assign {spine_top_ow[S_OW-1], spine_top_sram_ow, spine_top_ow[S_OW-2:0]} = l_spine_ow;
-				assign l_spine_iw = {spine_top_iw[S_IW-1], sram_iw, spine_top_iw[S_IW-2:0]};
+				assign spine_top_ow = l_spine_ow;
+				assign spine_top_sram_ow = l_sram_ow;
+				assign l_spine_iw = spine_top_iw;
 			end else begin
-				assign {spine_bot_ow[S_OW-1], spine_bot_sram_ow, spine_bot_ow[S_OW-2:0]} = l_spine_ow;
-				assign l_spine_iw = {spine_bot_iw[S_IW-1], sram_iw, spine_bot_iw[S_IW-2:0]};
+				assign spine_bot_ow = l_spine_ow;
+				assign spine_bot_sram_ow = l_sram_ow;
+				assign l_spine_iw = spine_bot_iw;
 			end
 
 			// Branch Mux
@@ -319,6 +322,8 @@ module tt_top #(
 				.um_pg_ena (l_um_pg_ena),
 				.spine_ow  (l_spine_ow),
 				.spine_iw  (l_spine_iw),
+				.sram_ow   (l_sram_ow),
+				.sram_iw   (sram_iw),
 				.addr      (l_addr),
 				.k_one     (l_k_one),
 				.k_zero    (l_k_zero)

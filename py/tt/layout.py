@@ -136,9 +136,9 @@ class Layout:
 			'ow': self.cfg.tt.uio.o + self.cfg.tt.uio.io * 2 + 2,
 			'iw': self.cfg.tt.uio.i + self.cfg.tt.uio.io + 9 + 1 + 2,
 		})
-		self.vspine_sram = ConfigNode({
-			'ow': self.vspine.ow + sram_ow,
-			'iw': self.vspine.iw + sram_iw,
+		self.user_std = ConfigNode({
+			'ow': self.cfg.tt.uio.o + self.cfg.tt.uio.io * 2,
+			'iw': self.cfg.tt.uio.i + self.cfg.tt.uio.io,
 		})
 		self.user = ConfigNode({
 			'ow': self.cfg.tt.uio.o + self.cfg.tt.uio.io * 2 + sram_ow,
@@ -452,9 +452,9 @@ class Layout:
 
 		hspine_ply = [
 			('bus_gd',  (3,1)),			# so_gh
-			('bus_ow',  self.user.ow),	# so_usr
+			('bus_ow',  self.user_std.ow),	# so_usr (SRAM is a separate sideband)
 			('bus_gd',  (1,2)),			# so_gl, si_gh
-			('bus_iw',  self.user.iw),	# si_usr
+			('bus_iw',  self.user_std.iw),	# si_usr
 			('bus_gd',  (0,1)),			# si_sel[8]
 			(None,      3),				# si_sel[7:5]
 			('bus_sel', (0,5)),			# si_sel[4:0]
@@ -463,8 +463,8 @@ class Layout:
 		]
 
 		vspine_ply = [
-			('spine_ow', self.vspine_sram.ow),	# { so_gh, so_sram, so_usr, so_gl }
-			('spine_iw', self.vspine_sram.iw),	# { si_gh, si_sram, si_usr, si_sel, si_ena, si_gl }
+			('spine_ow', self.vspine.ow),	# { so_gh, so_usr, so_gl }
+			('spine_iw', self.vspine.iw),	# { si_gh, si_usr, si_sel, si_ena, si_gl }
 			('k_zero',   None),
 			('k_one',    None),
 			('addr',     4),
@@ -490,6 +490,25 @@ class Layout:
 		# Create pins for user blocks
 		self.ply_mux_bus  = self._ply_finalize(hspine_ply_e, tracks)
 		self.ply_mux_port = self._ply_finalize(vspine_ply_e, tracks)
+
+		# Shared SRAM sideband pins use a separate Metal4 pin bank on the
+		# opposite edge of the mux macro, keeping them off the narrow spine.
+		sram_ply = [
+			('sram_ow', self.user.ow - self.user_std.ow),
+			('sram_iw', self.user.iw - self.user_std.iw),
+		]
+		sram_ply_e = self._ply_expand(sram_ply)
+		self.ply_mux_sram = {}
+		if sram_ply_e:
+			sram_tracks = self._ply_distribute(
+				n_pins = len(sram_ply_e),
+				start  = 0,
+				end    = self.glb.mux.height,
+				step   = 0,
+				layer  = 'Metal4',
+				axis   = 'y',
+			)
+			self.ply_mux_sram = self._ply_finalize(sram_ply_e, sram_tracks)
 
 	def vspine_layout(self):
 
